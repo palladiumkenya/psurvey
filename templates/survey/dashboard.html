@@ -1,0 +1,380 @@
+{% extends 'survey/base.html' %}
+{% load static %}
+{% block title %}
+    Dashboard
+{% endblock %}
+{% block headscript %}
+    <link href="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.js"></script>
+
+    <script type="text/javascript"
+            src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/js/bootstrap-multiselect.js"></script>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/0.9.13/css/bootstrap-multiselect.css"
+          type="text/css"/>
+
+{% endblock %}
+{% block breadcrumb %}
+    <h6 class="h2 text-white d-inline-block mb-0">Dashboard</h6>
+    <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i></a></li>
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+        </ol>
+    </nav>
+{% endblock %}
+{% block body %}
+
+
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-stats">
+                <!-- Card body -->
+                <div class="card-body">
+                    <div class="row">
+                        {% if u.access_level.id != 4 %}
+                            <div class="col">
+                                <h5 class="card-title text-uppercase text-muted mb-0">Number of facilities</h5>
+                                <span class="h2 font-weight-bold mb-0">{{ fac.count }}</span>
+                            </div>
+                        {% else %}
+                            <div class="col">
+                                <h5 class="card-title text-uppercase text-muted mb-0">Number of Patients served</h5>
+                                <span class="h2 font-weight-bold mb-0">{{ fac }}</span>
+                            </div>
+                        {% endif %}
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-gradient-red text-white rounded-circle shadow">
+                                <i class="ni ni-active-40"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-stats">
+                <!-- Card body -->
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0">Total Questionnaires</h5>
+                            <span class="h2 font-weight-bold mb-0">{{ quest.count }}</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-gradient-orange text-white rounded-circle shadow">
+                                <i class="ni ni-chart-bar-32"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-stats">
+                <!-- Card body -->
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0">Active Questionnaires</h5>
+                            <span class="h2 font-weight-bold mb-0">{{ aq.count }}</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-gradient-green text-white rounded-circle shadow">
+                                <i class="ni ni-atom"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-stats">
+                <!-- Card body -->
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0">Total completed surveys</h5>
+                            <span class="h2 font-weight-bold mb-0">{{ resp.count }}</span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow">
+                                <i class="ni ni-folder-17"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    <!-- Page content -->
+    <div class="container-fluid mt--6">
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card">
+                <div class="card-header border-0">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h5 class="mb-0">Filters</h5>
+                        </div>
+                        <div class="col text-right">
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-xl-4">
+
+                            <label class="form-control-label" for="reportrange">Date Range</label>
+                            <div id="reportrange"
+                                 style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                                <i class="ni ni-calendar-grid-58"></i>&nbsp;
+                                <span></span> <i class="fa fa-caret-down"></i>
+                            </div>
+                        </div>
+                        {% if u.access_level.id != 4 %}
+                            <div class="col-xl-6">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="facility">Facilities</label>
+                                    <div>
+                                        <select multiple="multiple" class="form-control" name="facility" id="facility"
+                                                placeholder="Facilities" onchange="facChange()" required>
+                                            {% for f in fac %}
+                                                <option value="{{ f.id }}">{{ f.name }} | {{ f.county }}
+                                                    | {{ f.sub_county }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl-8">
+            <div class="card bg-defaudefault">
+                <div class="card-header bg-transparent">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h6 class="text-light text-uppercase ls-1 mb-1">Overview</h6>
+                            <h5 class="h3 text-blue mb-0">Responses Trend</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Chart -->
+                    <div class="chart" id="chart1">
+                        <!-- Chart wrapper -->
+                        <canvas id="population-chart" data-url="{% url 'all-resp-chart' %}"
+                                class="chart-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-4">
+            <div class="card bg-default">
+                <div class="card-header bg-transparent">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h6 class="text-uppercase text-muted ls-1 mb-1">Performance</h6>
+                            <h5 class="h3 text-white mb-0">Responses Performance</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Chart -->
+                    <div class="chart" id="chart2">
+                        <canvas id="chart-bar" data-url={% url 'trend-chart' %}"" class="chart-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript"
+            src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
+    <script>
+        $(function () {
+            $('select').multipleSelect({
+                multiple: true,
+                multipleWidth: 450,
+                filter: true,
+                filterPlaceholder: 'Search'
+            });
+
+        })
+    </script>
+    <script type="text/javascript">
+
+        let start = moment().subtract(29, 'days');
+        let end = moment();
+        let facilities = $('#facility');
+        $(function () {
+            ChartInit();
+            DateRange();
+        });
+
+        function DateRange() {
+
+            function cb(start, end) {
+                $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+            }
+
+            dateRange = $('#reportrange');
+            dateRange.daterangepicker({
+                startDate: moment().subtract(29, 'days'),
+                endDate: moment(),
+                maxDate: moment(),
+                ranges: {
+                    'Today': [moment(), moment()],
+                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                    'This Month': [moment().startOf('month'), moment().endOf('month')],
+                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                }
+            }, cb).on("apply.daterangepicker", function (event, picker) {
+                start = dateRange.data("daterangepicker").startDate;
+                end = dateRange.data("daterangepicker").endDate;
+                ChartInit(start, end);
+            });
+
+            cb(start, end);
+
+        }
+
+        var pForm = $("#filterform");
+
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = jQuery.trim(cookies[i]);
+                    // Does this cookie string begin with the name we want?
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        var csrftoken = getCookie('csrftoken');
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        $.ajaxSetup({
+            beforeSend: function (xhr, settings) {
+                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                }
+            }
+        });
+
+        function resetCanvas() {
+            $('#population-chart').remove(); // this is my <canvas> element
+            div = document.querySelector("#chart1");
+            div.insertAdjacentHTML("afterbegin", "<canvas id=\"population-chart\" data-url=\"{% url 'all-resp-chart' %}\"\n" +
+                "                                class=\"chart-canvas\"></canvas>");
+
+            canvas = document.querySelector('#population-chart');
+            $('#chart-bar').remove(); // this is my <canvas> element
+            div = document.querySelector("#chart2");
+            div.insertAdjacentHTML("afterbegin", "<canvas id=\"chart-bar\" data-url=\"{% url 'trend-chart' %}\"\n" +
+                "                                class=\"chart-canvas\"></canvas>");
+
+            canvas = document.querySelector('#chart-bar');
+        }
+
+        function facChange() {
+            ChartInit();
+        }
+
+        function ChartInit() {
+            resetCanvas();
+            var $populationChart = $("#population-chart");
+            var $trendChart = $('#chart-bar');
+            $.ajax({
+                url: $populationChart.data("url"),
+                data: {
+                    start_date: start.format('YYYY-MM-DD'),
+                    end_date: end.format('YYYY-MM-DD'),
+                    fac: facilities.val(),
+                },
+                type: 'POST',
+                success: function (data) {
+                    var ctx = $populationChart[0].getContext("2d");
+
+                    new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'Response',
+                                data: data.data
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            tooltips: {
+                                mode: 'index',
+                                intersect: false,
+                            },
+                            hover: {
+                                mode: 'nearest',
+                                intersect: true
+                            },
+                            scales: {
+                                yAxes: [{
+                                    gridLines: {
+                                        lineWidth: 1,
+                                        color: Charts.colors.gray[900],
+                                        zeroLineColor: Charts.colors.black[800],
+                                    }
+                                }]
+                            },
+                        }
+                    });
+                }
+            });
+            $.ajax({
+                url: $trendChart.data("url"),
+                data: {
+                    start_date: start.format('YYYY-MM-DD'),
+                    end_date: end.format('YYYY-MM-DD'),
+                    fac: facilities.val(),
+                },
+                type: 'POST',
+                success: function (data) {
+                    console.log(data)
+                    new Chart($trendChart, {
+                        type: 'bar',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                                label: 'Responses',
+                                data: data.data
+                            }]
+                        }
+                    });
+                }
+            });
+        }
+    </script>
+
+{% endblock %}

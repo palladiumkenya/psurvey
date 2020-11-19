@@ -1,0 +1,181 @@
+{% extends 'survey/base.html' %}
+{% block title %}
+    Response report
+{% endblock %}
+{% block headscript %}
+    <style>
+        td.details-control {
+            background: url('https://datatables.net/examples/resources/details_open.png') no-repeat center center;
+            cursor: pointer;
+        }
+
+        tr.shown td.details-control {
+            background: url('https://datatables.net/examples/resources/details_close.png') no-repeat center center;
+        }
+    </style>
+{% endblock %}
+{% block breadcrumb %}
+    <h4 class="h4 text-white d-inline-block mb-0">Reports</h4>
+    <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i></a></li>
+            <li class="breadcrumb-item"><a href="{% url 'patients_report' %}"><small>Patient List</small></a></li>
+
+            <li class="breadcrumb-item active" aria-current="page"><small>Patient List</small></li>
+        </ol>
+    </nav>
+{% endblock %}
+{% block body %}
+
+
+    </div>
+    </div>
+    </div>
+    <!-- Page content -->
+    <div class="container-fluid mt--6">
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card">
+                <div class="card-body">
+                </div>
+                <div class="mt-4">
+                    <h3 class="text-center">Patient List</h3>
+                    <div class="table-responsive">
+                        <!-- Projects table -->
+
+                        <table id="users" class="table table-striped table-bordered" style="width:100%">
+                            <thead>
+                            <tr>
+                                <th></th>
+                                <th>Name</th>
+                                <th>CCC Number</th>
+                            </tr>
+                            </thead>
+                            <tfoot>
+                            <tr>
+                                <th></th>
+                                <th>Name</th>
+                                <th>CCC Number</th>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+{% block scripts %}
+    <script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script src="//cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+    <link href="https://cdn.datatables.net/1.10.22/css/jquery.dataTables.min.css">
+
+    <script>
+
+        function format(d, data) {
+            // `d` is the original data object for the row
+            console.log(d)
+            let a = "";
+            for (i in d.responses) {
+                console.log(d.responses.length)
+                for (x in d.responses[i].data) {
+                    if (d.responses[i].data.length === 0) {
+                        a = a + '<tr>' + '<td colspan="6" class="text-red"> No resposes given</td>' + '</tr>'
+
+                    } else {
+                        if (d.responses[i].data[x].question.question_type === 1) {
+                            rep = d.responses[i].data[x].open_text
+                        } else
+                            rep = d.responses[i].data[x].answer.option
+                        if (d.responses[i].data[x].question.question_type === 1)
+                            ty = "OPEN TEXT"
+                        else if (d.responses[i].data[x].question.question_type === 2)
+                            ty = "SINGLE SELECT"
+                        else if (d.responses[i].data[x].question.question_type === 3)
+                            ty = "MULTIPLE SELECT"
+                        a = a + '<tr>' +
+                            '<td>' + d.responses[i].session + '</td>' +
+                            '<td>' + d.responses[i].data[x].questionnaire.name + '</td>' +
+                            '<td>' + d.responses[i].data[x].question.question + '</td>' +
+                            '<td>' + ty + '</td>' +
+                            '<td>' + rep + '</td>' +
+                            '<td>' + d.responses[i].data[x].created_at + '</td>' +
+                            '</tr>'
+                    }
+                }
+
+            }
+            if (a === "") {
+                a = '<tr>' +
+                    '<td colspan="5" class="text-red"> No resposes given</td>' +
+                    '</tr>'
+            }
+
+            return '<table cellpadding="5" cellspacing="0" border="0" style="padding-left:50px;">' +
+
+                '<thead>' +
+                '<th>Session</th>' +
+                '<th>Questionnaire</th>' +
+                '<th>Question</th>' +
+                '<th>Question Type</th>' +
+                '<th>Response Given</th>' +
+                '<th>Date responded</th>' +
+                '</thead>' + a +
+                '</table>';
+        }
+
+        $(document).ready(function () {
+
+            var table = $('#users').DataTable({
+                processing: true,
+                "language": {
+                    processing: '<span class="sr-only">Loading...</span> '
+                },
+                "ajax": {
+                    "url": '/web/patients/list',
+                    dataSrc: "data",
+                    dataFilter: function (data) {
+                        var json = jQuery.parseJSON(data);
+                        console.log(json)
+
+                        return JSON.stringify(json); // return JSON string
+                    }
+                },
+                "columns": [
+                    {
+                        "className": 'details-control',
+                        "orderable": false,
+                        "data": null,
+                        "defaultContent": ''
+                    },
+                    {"data": "name"},
+                    {"data": "ccc_number"}
+                ],
+                "order": [[1, 'asc']]
+            });
+
+            // Add event listener for opening and closing details
+            $('#users tbody').on('click', 'td.details-control', function () {
+                var tr = $(this).closest('tr');
+                var row = table.row(tr);
+
+
+                if (row.child.isShown()) {
+                    // This row is already open - close it
+                    row.child.hide();
+                    tr.removeClass('shown');
+                } else {
+                    console.log(row)
+                    row.child(format(row.data())).show();
+                    tr.addClass('shown');
+                }
+            });
+
+
+        });
+        $.fn.dataTable.ext.errMode = 'throw';
+    </script>
+{% endblock %}

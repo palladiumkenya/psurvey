@@ -1,0 +1,202 @@
+{% extends 'survey/base.html' %}
+{% load static %}
+{% block title %}
+    User Profile
+{% endblock %}
+{% block breadcrumb %}
+
+    <h6 class="h2 text-white d-inline-block mb-0">User profile</h6>
+    <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i></a></li>
+            <li class="breadcrumb-item"><a href="{% url 'facility-partner-list' %}"><small>profile</small></a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page"><small>profile</small></li>
+        </ol>
+    </nav>
+{% endblock %}
+{% block body %}
+    <div class="row align-items-center py-4">
+
+    </div>
+    </div>
+    </div>
+    </div>
+    <!-- Page content -->
+    <div class="container-fluid mt--6">
+        <div class="row">
+            <div class="col-xl-12 order-xl-2">
+                <div class="card card-profile">
+                    <img src="{% static 'survey/img/img-1-1000x600.jpg' %}" alt="Image placeholder"
+                         class="card-img-top">
+                    <div class="card-header text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
+                        <div class="d-flex justify-content-between">
+
+                        </div>
+                    </div>
+                    <div class="card-body pt-0">
+                        <div class="row">
+                            <div class="col">
+                                <div class="card-profile-stats d-flex justify-content-center">
+                                    <div>
+                                        <span class="heading">Access level</span>
+                                        <span class="description">{{ u.access_level }}</span>
+                                    </div>
+                                    <div>
+                                        <span class="heading">registered on</span>
+                                        <span class="description">{{ u.date_joined }}</span>
+                                    </div>
+                                    {% if u.access_level.id == 2 %}
+                                        <div>
+                                            <span class="heading">Partner</span>
+                                            <span class="description">{{ p.name }}</span>
+                                        </div>
+                                    {% endif %}
+                                    {% if u.access_level.id == 4 %}
+                                        <div>
+                                            <span class="heading">Facility</span>
+                                            <span class="description">{{ u.facility.name }}</span>
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-center">
+                            <h5 class="h3"><i class="ni ni-tag"></i>
+                                {{ u.f_name }} {{ u.l_name }}
+                            </h5>
+                            <div class="h3 font-weight-300">
+                                <i class="ni ni-lock-circle-open mr-2"></i>{{ u.email }}
+                            </div>
+                            <div class="h3 font-weight-300">
+                                <i class="ni ni-mobile-button mr-2"></i>{{ u.msisdn }}
+                            </div>
+                        </div>
+                        <div class="col-12 text-right">
+                            <button class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Edit
+                                profile
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3 class="mb-0">Edit profile </h3>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+
+                        </div>
+                        <div class="modal-body">
+                            <form method="post" id="formP" action="{% url 'profile' %}">
+                                {% csrf_token %}
+                                <h6 class="heading-small text-muted mb-4">User information</h6>
+                                <div class="pl-lg-4">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="f_name">First name</label>
+                                                <input type="text" id="f_name" class="form-control" name="f_name"
+                                                       placeholder="first name" value="{{ u.f_name }}" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="l_name">Last name</label>
+                                                <input type="text" id="l_name" class="form-control" name="l_name"
+                                                       placeholder="last name" value="{{ u.l_name }}" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="email">Email
+                                                    address</label>
+                                                <input type="email" id="email" class="form-control" name="email"
+                                                       placeholder="Email address" value="{{ u.email }}" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="msisdn">Mobile Number</label>
+                                                <input type="tel" id="msisdn" class="form-control" name="msisdn"
+                                                       placeholder="Mobile number" value="{{ u.msisdn }}" required>
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <hr class="my-4"/>
+                                <button type="submit" class="btn btn-success">Save</button>
+                                <a type="button" href="." class="btn btn-danger">Cancel</a>
+                                <hr class="my-4"/>
+
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+{% endblock %}
+{% block scripts %}
+        <script>
+        var qForm = $("#formP");
+        // qForm.addEventListener('submit', CheckData);
+        $(document).ready(function (e) {
+            qForm.submit(function (e) {
+                //if (CheckData())  {
+                e.preventDefault();
+                var thisForm = $(this);
+                var endPoint = thisForm.attr("action") || window.location.href;
+                var method = thisForm.attr("method");
+                var formData = thisForm.serialize();
+
+                Swal.fire({
+                    title: "Please wait!,Saving Details!",
+                    imageUrl: "/static/survey/img/Infinity-loader.gif",
+                    showConfirmButton: false,
+                    allowOutsideClick: false
+                });
+                $.ajax({
+                    type: method,
+                    url: endPoint,
+                    data: formData,
+                    success: function (data) {
+                        if (data === "error") {
+                            console.log(qForm[0])
+                            Swal.fire({
+                                title: 'Enter all Data!!',
+                                text: 'Data Error',
+                                icon: 'error'
+                            });
+                        } else {
+                            console.log(qForm[0])
+                            Swal.fire({
+                                title: 'Success!',
+                                text: 'Details Saved',
+                                icon: 'success'
+                            });
+                            setTimeout(location.reload(), 5000);
+
+                        }
+                    },
+                    error: function (er) {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Details Cannot be Saved',
+                            icon: 'error'
+                        });
+                    }
+                });
+            });
+
+        });
+
+    </script>
+{% endblock %}

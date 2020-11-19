@@ -1,0 +1,208 @@
+{% extends 'survey/base.html' %}
+{% load static %}
+{% block title %}
+    New Facility Admin
+{% endblock %}
+{% block headscript %}
+    <link href="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.css" rel="stylesheet">
+
+    <script src="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.js"></script>
+
+{% endblock %}
+{% block breadcrumb %}
+
+    <h6 class="h5 text-white d-inline-block mb-0">New Facility Admin</h6>
+    <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i></a></li>
+            <li class="breadcrumb-item"><a href="{% url 'list-fac-admin' %}"><small>Facility Admins list</small></a>
+            </li>
+            <li class="breadcrumb-item"><a href="."><small>New Facility Admin link</small></a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page"><small>new facility admin</small></li>
+        </ol>
+    </nav>
+{% endblock %}
+{% block body %}
+    <div class="row align-items-center py-4">
+
+    </div>
+    </div>
+    </div>
+    </div>
+    <!-- Page content -->
+    <div class="container-fluid mt--6">
+        <div class="row">
+            <div class="col-xl-7 order-xl-2 center">
+                <div class="card">
+                    <!-- Card header -->
+                    <div class="card-header border-0">
+                        <h3 class="mb-0">Create Facility Admin user Account</h3>
+                    </div>
+                    <div class="card-body">
+                        <form class="form-group" id="new_partner" method="post" action="{% url 'register-fac-admin' %}">
+                            {% csrf_token %}
+                            <h6 class="heading-small text-muted mb-4">Personal information</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label" for="f_name">First Name</label>
+                                            <input type="text" id="f_name" name="f_name" class="form-control"
+                                                   placeholder="John" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label" for="l_name">Last Name</label>
+                                            <input type="text" id="l_name" name="l_name" class="form-control"
+                                                   placeholder="Doe" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label" for="email">Email</label>
+                                            <input type="email" id="email" name="email" class="form-control"
+                                                   placeholder="a@b.c" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label" for="msisdn">Mobile Number</label>
+                                            <input type="tel" id="msisdn" name="msisdn" class="form-control"
+                                                   placeholder="0700000000" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label" for="password">Password</label>
+                                            <input type="password" id="password" name="password" class="form-control"
+                                                   placeholder="password" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label" for="re_password">Confirm password</label>
+                                            <input type="password" id="re_password" name="re_password"
+                                                   class="form-control"
+                                                   placeholder="confirm password" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <hr class="my-4"/>
+                                <h6 class="heading-small text-muted mb-4">Facility</h6>
+                                <div class="form-group">
+                                    <label class="form-control-label" for="facility">Facility</label>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <select class="form-control" name="facility" id="facility"
+                                                placeholder="Facility" required>
+                                            {% for foo in fac %}
+                                                <option value="{{ foo.id }}">{{ foo.name }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                </div>
+
+
+                            </div>
+                            <hr class="my-4"/>
+                            <button type="submit" class="btn btn-success">Save</button>
+                            <button type="button" class="btn btn-danger">Cancel</button>
+
+
+                        </form>
+                    </div>
+                    <!-- Card footer -->
+                    <nav aria-label="...">
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+{% endblock %}
+{% block scripts %}
+
+    <script>
+        $(function () {
+            $('select').multipleSelect({
+                multiple: true,
+                multipleWidth: 400,
+                filter: true,
+                filterPlaceholder: 'Search'
+            })
+        })
+    </script>
+    <script>
+        var pForm = $("#new_partner");
+
+        $(document).ready(function (e) {
+
+            pForm.submit(function (e) {
+                e.preventDefault();
+
+                var thisForm = $(this);
+                var endPoint = thisForm.attr("action") || window.location.href;
+                var method = thisForm.attr("method");
+                var formData = thisForm.serialize();
+
+                Swal.fire({
+                    title: "Please wait!,Saving Details!",
+                    imageUrl: "/static/survey/img/Infinity-loader.gif",
+                    showConfirmButton: false,
+                    allowOutsideClick: false
+                });
+                $.ajax({
+                    type: method,
+                    url: endPoint,
+                    data: formData,
+                    success: function (data) {
+                        if (data == "Password error") {
+                            console.log(pForm[0])
+                            Swal.fire({
+                                title: 'Password error!!',
+                                text: 'Passwords dont match',
+                                icon: 'error'
+                            });
+                        } else if (data == "error") {
+                            console.log(pForm[0])
+                            Swal.fire({
+                                title: 'Error!!',
+                                text: 'Something went wrong',
+                                icon: 'error'
+                            });
+                        } else {
+                            console.log(pForm[0])
+                            Swal.fire({
+                                title: 'Success!',
+                                text: 'User Details Saved',
+                                icon: 'success'
+                            });
+                            pForm[0].reset();
+                            location.reload();
+                        }
+                    },
+                    error: function (er) {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Details cannot be saved',
+                            icon: 'error'
+                        });
+                    }
+                });
+            });
+
+        });
+
+
+
+    </script>
+
+{% endblock %}

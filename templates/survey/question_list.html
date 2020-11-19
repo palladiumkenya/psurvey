@@ -1,0 +1,112 @@
+{% extends 'survey/base.html' %}
+{% block title %}
+    Question list
+{% endblock %}
+{% block breadcrumb %}
+
+    <h6 class="h2 text-white d-inline-block mb-0">Questions</h6>
+    <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i></a></li>
+            <li class="breadcrumb-item"><a href="{% url 'questionnaires' %}"><small>questionnaires</small></a></li>
+            <li class="breadcrumb-item"><a href="."><small>questions</small></a></li>
+            <li class="breadcrumb-item active" aria-current="page"><small>questions</small></li>
+        </ol>
+    </nav>
+{% endblock %}
+{% block body %}
+
+    </div>
+    </div>
+    </div>
+    <!-- Page content -->
+    <div class="container-fluid mt--6">
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <!-- Card header -->
+                <div class="card-header border-0">
+                    <div class="row align-items-center py-4">
+
+                        <h3 class="mb-0">Question List</h3>
+                        <div class="col-lg-6 col-5 text-right">
+                            <a href="{% url 'add-question' q_id=questionnaire %}" class="btn btn-sm btn-neutral">Add
+                                question</a>
+                            <button class="btn btn-sm btn-neutral" data-toggle="modal" data-target="#exampleModal">
+                                Filters</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Light table -->
+                <div class="table-responsive">
+                    <table class="table align-items-center table-flush table-dark">
+                        <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Question</th>
+                            <th scope="col">Question Type</th>
+                            <th scope="col">User</th>
+                            <th scope="col">Access Level</th>
+                            <th scope="col">Created at</th>
+                            <th scope="col"></th>
+                        </tr>
+                        </thead>
+                        <tbody class="list">
+                        {% for foo in quest %}
+                            <tr>
+                                <td>{{ foo.question }}</td>
+                                <td>
+                                    {% if foo.question_type == 1 %}
+                                        Open Ended
+                                    {% elif foo.question_type == 2 %}
+                                        Single Select
+                                    {% elif foo.question_type == 3 %}
+                                        Multiple Select
+                                    {% endif %} </td>
+                                <td>{{ foo.created_by.f_name }}</td>
+                                <td>{{ foo.created_by.access_level.access_level }}</td>
+                                <td>{{ foo.created_at }}</td>
+                                <td class="text-right">
+                                    <div class="dropdown">
+                                        <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
+                                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="fas fa-ellipsis-v"></i>
+                                        </a>
+                                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                                            <a class="dropdown-item" href="{% url 'edit-question' q_id=foo.id %}">Edit
+                                                Questions</a>
+                                            <a class="dropdown-item" href="{% url 'response_report' q_id=foo.id %}">Response Report</a>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Card footer -->
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Filters</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    ...
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Filter</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

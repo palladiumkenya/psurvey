@@ -1,0 +1,355 @@
+{% extends 'survey/base.html' %}
+{% block title %}
+    Questionnaire list
+{% endblock %}
+{% block headscript %}
+
+    <style>
+        @import url("https://netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css");
+
+        table.fold-table > tbody > tr.view td, table.fold-table > tbody > tr.view th {
+            cursor: pointer;
+        }
+
+        table.fold-table > tbody > tr.view td:first-child,
+        table.fold-table > tbody > tr.view th:first-child {
+            position: relative;
+            padding-left: 20px;
+        }
+
+        table.fold-table > tbody > tr.view td:first-child:before,
+        table.fold-table > tbody > tr.view th:first-child:before {
+            position: absolute;
+            top: 50%;
+            left: 5px;
+            width: 9px;
+            height: 16px;
+            margin-top: -8px;
+            font: 16px fontawesome;
+            content: "\f0d7";
+            transition: all .3s ease;
+        }
+
+
+        table.fold-table > tbody > tr.view.open {
+            background: gray;
+            color: white;
+        }
+
+        table.fold-table > tbody > tr.view.open td:first-child:before,
+        table.fold-table > tbody > tr.view.open th:first-child:before {
+            transform: rotate(-180deg);
+            color: #333333;
+        }
+
+        table.fold-table > tbody > tr.fold {
+            display: none;
+        }
+
+        table.fold-table > tbody > tr.fold.open {
+            display: table-row;
+        }
+
+        .fold-content {
+            padding: .5em;
+        }
+
+        .fold-content h3 {
+            margin-top: 0;
+        }
+
+    </style>
+{% endblock %}
+{% block breadcrumb %}
+
+    <h6 class="h2 text-white d-inline-block mb-0">Questionnaires</h6>
+    <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i></a></li>
+            <li class="breadcrumb-item"><a href="{% url 'questionnaires' %}"><small>questionnaires</small></a></li>
+            <li class="breadcrumb-item active" aria-current="page"><small>questionnaires</small></li>
+        </ol>
+    </nav>
+{% endblock %}
+{% block body %}
+
+    </div>
+    </div>
+    </div>
+    <!-- Page content -->
+    <div class="container-fluid mt--6">
+    <div class="row">
+        <div class="col">
+            <div class="card">
+                <!-- Card header -->
+                <div class="card-header border-0">
+                    <div class="row align-items-center py-4">
+
+                        <h3 class="mb-0">Questionnaire List</h3>
+                        <div class="col-lg-6 col-5 text-right">
+                            {% if u.access_level.id != 4 %}
+                                <a href="{% url 'new-questionnaires' %}" class="btn btn-sm btn-neutral">New
+                                    Questionnaire</a>
+                            {% endif %}
+                            <button class="btn btn-sm btn-neutral" data-toggle="modal" data-target="#exampleModal">
+                                Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Light table -->
+                <div class="table-responsive">
+                    <p class="mx-3" style="text-align: right">
+                        <i class="ni ni-spaceship text-indigo"></i> Questionnaire count: {{ count }}
+                    </p>
+                    <table class="table align-items-center table-flush fold-table">
+                        <thead class="thead-light">
+                        <tr>
+                            <th>Name</th>
+                            <th scope="col">Status</th>
+                            <th scope="col">Active till</th>
+                            <th scope="col">Created by</th>
+                            <th scope="col">Access Level</th>
+                            <th scope="col">Created at</th>
+                            <th scope="col"></th>
+                        </tr>
+                        </thead>
+                        <tbody class="list">
+                        {% if count > 0 %}
+                            {% for foo in quest %}
+                                <tr class="view">
+                                    <td>{{ foo.name }}</td>
+                                    <td>{% if foo.is_active %}
+                                        <span class="badge badge-dot mr-4">
+                                        <i class="bg-success"></i>
+                                        <span class="status">Active</span>
+                                    </span>
+                                    {% else %}
+                                        <span class="badge badge-dot mr-4">
+                                        <i class="bg-warning"></i>
+                                        <span class="status">Inactive</span>
+                                    </span>
+
+                                    {% endif %}
+                                    </td>
+                                    <td>{{ foo.active_till }}</td>
+                                    <td>{{ foo.created_by.f_name }}</td>
+                                    <td>{{ foo.created_by.access_level.access_level }}</td>
+                                    <td>{{ foo.created_at }}</td>
+                                    <td class="text-right">
+                                        <div class="dropdown">
+                                            <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
+                                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                                                {% if u.access_level.id == 4 %}
+                                                    <a class="dropdown-item disabled"
+                                                       href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                        Questionnaire</a>
+                                                    <a class="dropdown-item disabled"
+                                                       href="{% url 'questions' q_id=foo.id %}">Edit
+                                                        Questions</a>
+                                                {% elif foo.created_by.access_level.id == 2 %}
+                                                    <a class="dropdown-item"
+                                                       href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                        Questionnaire</a>
+                                                    <a class="dropdown-item"
+                                                       href="{% url 'questions' q_id=foo.id %}">Edit
+                                                        Questions</a>
+                                                {% elif foo.created_by.access_level.id != u.access_level.id %}
+                                                    <a class="dropdown-item disabled"
+                                                       href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                        Questionnaire</a>
+                                                    <a class="dropdown-item disabled"
+                                                       href="{% url 'questions' q_id=foo.id %}">Edit
+                                                        Questions</a>
+                                                {% else %}
+                                                    <a class="dropdown-item"
+                                                       href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                        Questionnaire</a>
+                                                    <a class="dropdown-item"
+                                                       href="{% url 'questions' q_id=foo.id %}">Edit
+                                                        Questions</a>
+                                                {% endif %}
+
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="fold">
+                                    <td colspan="7">
+                                        <div class="fold-content">
+                                            <h3>Questionnaire Desscription</h3>
+                                            <p>{{ foo.description }}.</p></div>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr class="mx-3 text-center text-orange">
+                                <td colspan="6">No Records</td>
+                            </tr>
+                        {% endif %}
+
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Card footer -->
+
+                <div class="card-footer py-4">
+                    {% if quest.has_other_pages %}
+                        <ul class="pagination justify-content-end mb-0">
+                            {% if quest.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ quest.previous_page_number }}">
+                                        <i class="fas fa-angle-left"></i>
+                                        <span class="sr-only">Previous</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <a class="page-link">
+                                        <i class="fas fa-angle-left"></i>
+                                        <span class="sr-only">Previous</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                            {% for i in quest.paginator.page_range %}
+                                {% if quest.number == i %}
+                                    <li class="page-item active">
+                                            <span class="page-link">{{ forloop.counter }} <span
+                                                    class="sr-only">(current)</span></span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                           href="?page={{ forloop.counter }}">{{ forloop.counter }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if quest.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ quest.next_page_number }}">
+                                        <i class="fas fa-angle-right"></i>
+                                        <span class="sr-only">Next</span>
+                                    </a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <a class="page-link">
+                                        <i class="fas fa-angle-right"></i>
+                                        <span class="sr-only">Next</span>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Date Filter</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form action="{% url 'questionnaires' %}" method="post" id="qform">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-xl-4">
+
+                                <label class="form-control-label" for="reportrange">Date Range</label>
+                                <div id="reportrange"
+                                     style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
+                                    <i class="ni ni-calendar-grid-58"></i>&nbsp;
+                                    <span></span> <i class="fa fa-caret-down"></i>
+                                </div>
+                            </div>
+
+                        </div>
+                        ...
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block scripts %}
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
+    <script>
+        $(function () {
+            $(".fold-table tr.view").on("click", function () {
+                $(this).toggleClass("open").next(".fold").toggleClass("open");
+            });
+        });
+    </script>
+    <script type="text/javascript">
+
+        let start = moment().subtract(29, 'days');
+        let end = moment();
+        $(function () {
+            DateRange();
+            $('#qform').submit(function () {
+                var form = document.getElementById('qform');//retrieve the form as a DOM element
+
+                let input = document.createElement('input');//prepare a new input DOM element
+                input.setAttribute('name', 'start_date');//set the param name
+                input.setAttribute('value', start.format('YYYY-MM-DD'));//set the value
+                input.setAttribute('type', 'hidden')
+                form.appendChild(input);//append the input to the form
+
+                let input2 = document.createElement('input');//prepare a new input DOM element
+
+                input2.setAttribute('name', 'end_date');//set the param name
+                input2.setAttribute('value', end.format('YYYY-MM-DD'));//set the value
+                input2.setAttribute('type', 'hidden')
+                form.appendChild(input2);
+
+                form.submit();//send with added input
+            });
+        });
+
+        function DateRange() {
+
+            function cb(start, end) {
+                $('#reportrange span').html(start.format('MMMM D, YYYY') + ' - ' + end.format('MMMM D, YYYY'));
+            }
+
+            dateRange = $('#reportrange');
+            dateRange.daterangepicker({
+                startDate: moment().subtract(29, 'days'),
+                endDate: moment(),
+                maxDate: moment(),
+                ranges: {
+                    'Today': [moment(), moment()],
+                    'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+                    'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+                    'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+                    'This Month': [moment().startOf('month'), moment().endOf('month')],
+                    'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+                }
+            }, cb).on("apply.daterangepicker", function (event, picker) {
+                start = dateRange.data("daterangepicker").startDate;
+                end = dateRange.data("daterangepicker").endDate;
+            });
+
+            cb(start, end);
+
+        }
+
+    </script>
+{% endblock %}

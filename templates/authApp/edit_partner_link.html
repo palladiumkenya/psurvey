@@ -1,0 +1,147 @@
+{% extends 'survey/base.html' %}
+{% load static %}
+{% block title %}
+    New Questionnaire
+{% endblock %}
+{% block headscript %}
+    <link href="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.css" rel="stylesheet">
+
+    <script src="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.js"></script>
+
+{% endblock %}
+{% block breadcrumb %}
+
+    <h6 class="h5 text-white d-inline-block mb-0">Edit partner link</h6>
+    <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i></a></li>
+            <li class="breadcrumb-item"><a href="{% url 'facility-partner-list' %}"><small>partner facility list</small></a>
+            </li>
+            <li class="breadcrumb-item"><a href="."><small>edit partner link</small></a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page"><small>edit partner link</small></li>
+        </ol>
+    </nav>
+{% endblock %}
+{% block body %}
+    <div class="row align-items-center py-4">
+
+    </div>
+    </div>
+    </div>
+    </div>
+    <!-- Page content -->
+    <div class="container-fluid mt--6">
+        <div class="row">
+            <div class="col-xl-5  center">
+                <div class="card card-profile">
+                    <img src="{% static 'survey/img/edit_header.jpg' %}" alt="Image placeholder"
+                         class="card-img-top">
+                    <div class="card-header border-0">
+                        <h3 class="mb-0">Partner Facility Link</h3>
+                    </div>
+                    <div class="card-body pt-0">
+                        <form id="link-form" method="post" action="{% url 'edit-partner' p_id=p_id %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label class="form-control-label" for="partner">Partner Name</label>
+                                <input type="text" id="partner" name="partner" class="form-control"
+                                       placeholder="Partner abc" value="{{ pa.name }}" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-control-label" for="facility">Edit Facilities</label>
+                                <div>
+                                    <select multiple="multiple" class="form-control" name="facility" id="facility"
+                                            placeholder="Facilities" required>
+                                        {% for a in selected %}
+                                            <option value="{{ a.id }}" selected>{{ a.name }} | {{ a.mfl_code }}</option>
+                                        {% endfor %}
+                                        {% for foo in fac %}
+                                            <option value="{{ foo.id }}">{{ foo.name }} | {{ foo.mfl_code }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <hr class="my-4"/>
+                            <button type="submit" class="btn btn-success">Save</button>
+                            <button type="button" class="btn btn-danger">Cancel</button>
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+{% endblock %}
+{% block scripts %}
+
+    <script>
+        $(function () {
+            $('select').multipleSelect({
+                multiple: true,
+                multipleWidth: 400,
+                filter: true,
+                filterPlaceholder: 'Search'
+            })
+        })
+    </script>
+    <script>
+        var lForm = $('#link-form');
+
+        $(document).ready(function (e) {
+
+            lForm.submit(function (e) {
+                e.preventDefault();
+
+                var thisForm = $(this);
+                var endPoint = thisForm.attr("action") || window.location.href;
+                var method = thisForm.attr("method");
+                var formData = thisForm.serialize();
+
+                Swal.fire({
+                    title: "Please wait!,Saving Details!",
+                    imageUrl: "/static/survey/img/Infinity-loader.gif",
+                    showConfirmButton: false,
+                    allowOutsideClick: false
+                });
+                $.ajax({
+                    type: method,
+                    url: endPoint,
+                    data: formData,
+                    success: function (data) {
+                         if (data === "error") {
+                            console.log(lForm[0])
+                            Swal.fire({
+                                title: 'Error!!',
+                                text: 'Something went wrong',
+                                icon: 'error'
+                            });
+                        } else {
+                            console.log(lForm[0])
+                            Swal.fire({
+                                title: 'Success!',
+                                text: 'Partner Details Saved',
+                                icon: 'success'
+                            });
+                            location.reload();
+                        }
+                    },
+                    error: function (er) {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: 'Details cannot be saved',
+                            icon: 'error'
+                        });
+                    }
+                });
+            });
+
+        });
+
+
+    </script>
+
+{% endblock %}
