@@ -55,18 +55,6 @@ def designation(request):
         return Res({"data": serializer.data}, status=status.HTTP_200_OK)
 
 
-@api_view(['GET'])
-@permission_classes([IsAuthenticated])
-def current_user(request):
-    if request.method == "GET":
-        queryset = Users.objects.get(id=request.user.id)
-        serializer = MyUserSerializer(queryset)
-        aq = Facility_Questionnaire.objects.filter(facility_id=request.user.facility.id,
-                                                   questionnaire__is_active=True,
-                                                   questionnaire__active_till__gte=date.today()).count()
-        cs = End_Questionnaire.objects.filter(session__started_by=request.user).count()
-        return Res({'user': serializer.data, 'Active_questionnaires': aq, 'Completed_surveys': cs},
-                   status=status.HTTP_200_OK)
 
 
 # Web
@@ -256,6 +244,7 @@ def register_fac_admin(request):
     return render(request, 'authApp/new_fac_admin.html', context)
 
 
+@login_required
 def edit_partner(request, p_id):
     user = request.user
     if user.access_level.id == 2:
