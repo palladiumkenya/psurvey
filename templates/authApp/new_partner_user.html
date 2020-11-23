@@ -1,7 +1,7 @@
 {% extends 'survey/base.html' %}
 {% load static %}
 {% block title %}
-    New Partner Facility Link
+    New Partner User
 {% endblock %}
 {% block headscript %}
     <link href="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.css" rel="stylesheet">
@@ -38,32 +38,23 @@
                     <img src="{% static 'authApp/img/theme/img-1-1000x600.jpg' %}" alt="Image placeholder"
                          class="card-img-top">
                     <div class="card-header border-0">
-                        <h3 class="mb-0">Partner Facility Link</h3>
+                        <h3 class="mb-0">Partner Users</h3>
                     </div>
                     <div class="card-body pt-0">
-                        <form id="link-form" method="post" action="{% url 'facility-partner-link' %}">
-                            {% csrf_token %}
-                            <div class="form-group">
-                                <label class="form-control-label" for="partner">Partner Name</label>
-                                <input type="text" id="partner" name="partner" class="form-control"
-                                       placeholder="Partner abc" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-control-label" for="facility">Facilities</label>
-                                <div>
-                                    <select multiple="multiple" class="form-control" name="facility" id="facility"
-                                            placeholder="Facilities" onchange="county()" required>
-                                        {% for foo in fac %}
-                                            <option value="{{ foo.id }}">{{ foo.name }} | {{ foo.county }} | {{ foo.sub_county }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-                            <hr class="my-4"/>
-                            <button type="submit" class="btn btn-success">Save</button>
-                            <button type="button" class="btn btn-danger">Cancel</button>
-
-                        </form>
+                        <table class="table align-items-center table-flush table-dark">
+                            <thead>
+                            <th>Name</th>
+                            <th>Mobile</th>
+                            </thead>
+                            <tbody>
+                            {% for i in p_users %}
+                                <tr>
+                                <td>{{ i.user.f_name }} {{ i.user.l_name }}</td>
+                                <td>{{ i.user.msisdn }}</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
 
                     </div>
                 </div>
@@ -75,7 +66,7 @@
                         <h3 class="mb-0">Create Partner User Account</h3>
                     </div>
                     <div class="card-body">
-                        <form class="form-group" id="new_partner" method="post" action="{% url 'register-partner' %}">
+                        <form class="form-group" id="new_partner" method="post" action="{% url 'register-partner-user' %}">
                             {% csrf_token %}
                             <h6 class="heading-small text-muted mb-4">Personal information</h6>
                             <div class="pl-lg-4">
@@ -129,14 +120,14 @@
                                     </div>
                                 </div>
                                 <hr class="my-4"/>
-                                <h6 class="heading-small text-muted mb-4">Partner information</h6>
+                                <h6 class="heading-small text-muted mb-4">User permissions</h6>
                                 <div class="form-group">
-                                    <label class="form-control-label" for="partner-user">Partner level Users</label>
+                                    <label class="form-control-label" for="partner-user">User permissions</label>
                                 <div class="row">
                                     <div class="col-lg-6">
                                         <select class="form-control" name="partner-user" id="partner-user"
-                                                placeholder="Partner User" required>
-                                            {% for foo in p_users %}
+                                                placeholder="Permissions" multiple required>
+                                            {% for foo in perm %}
                                                 <option value="{{ foo.id }}">{{ foo.name }}</option>
                                             {% endfor %}
                                         </select>
