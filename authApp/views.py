@@ -220,7 +220,7 @@ def register_partner(request):
 def register_partner_user(request):
     u = request.user
     if u.access_level.id == 5:
-        if not request.user.has_perm('survey.add_users'):
+        if not request.user.has_perm('survey.view_users'):
             raise PermissionDenied
     elif u.access_level.id != 2:
         raise PermissionDenied
