@@ -87,7 +87,12 @@
 
                         <h3 class="mb-0">Questionnaire List</h3>
                         <div class="col-lg-6 col-5 text-right">
-                            {% if u.access_level.id != 4 %}
+                            {% if u.access_level.id == 5 %}
+                                {% if perms.survey.add_questionnaire %}
+                                    <a href="{% url 'new-questionnaires' %}" class="btn btn-sm btn-neutral">New
+                                        Questionnaire</a>
+                                {% endif %}
+                            {% elif u.access_level.id != 4 %}
                                 <a href="{% url 'new-questionnaires' %}" class="btn btn-sm btn-neutral">New
                                     Questionnaire</a>
                             {% endif %}
@@ -98,102 +103,245 @@
                     </div>
                 </div>
                 <!-- Light table -->
-                <div class="table-responsive">
-                    <p class="mx-3" style="text-align: right">
-                        <i class="ni ni-spaceship text-indigo"></i> Questionnaire count: {{ count }}
-                    </p>
-                    <table class="table align-items-center table-flush fold-table">
-                        <thead class="thead-light">
-                        <tr>
-                            <th>Name</th>
-                            <th scope="col">Status</th>
-                            <th scope="col">Active till</th>
-                            <th scope="col">Created by</th>
-                            <th scope="col">Access Level</th>
-                            <th scope="col">Created at</th>
-                            <th scope="col"></th>
-                        </tr>
-                        </thead>
-                        <tbody class="list">
-                        {% if count > 0 %}
-                            {% for foo in quest %}
-                                <tr class="view">
-                                    <td>{{ foo.name }}</td>
-                                    <td>{% if foo.is_active %}
-                                        <span class="badge badge-dot mr-4">
+                {% if u.access_level.id == 5 %}
+                    {% if perms.survey.view_questionnaire %}
+                        <div class="table-responsive">
+                            <p class="mx-3" style="text-align: right">
+                                <i class="ni ni-spaceship text-indigo"></i> Questionnaire count: {{ count }}
+                            </p>
+                            <table class="table align-items-center table-flush fold-table">
+                                <thead class="thead-light">
+                                <tr>
+                                    <th>Name</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Active till</th>
+                                    <th scope="col">Created by</th>
+                                    <th scope="col">Access Level</th>
+                                    <th scope="col">Created at</th>
+                                    <th scope="col"></th>
+                                </tr>
+                                </thead>
+                                <tbody class="list">
+                                {% if count > 0 %}
+                                    {% for foo in quest %}
+                                        <tr class="view">
+                                            <td>{{ foo.name }}</td>
+                                            <td>{% if foo.is_active %}
+                                                <span class="badge badge-dot mr-4">
                                         <i class="bg-success"></i>
                                         <span class="status">Active</span>
                                     </span>
-                                    {% else %}
-                                        <span class="badge badge-dot mr-4">
+                                            {% else %}
+                                                <span class="badge badge-dot mr-4">
                                         <i class="bg-warning"></i>
                                         <span class="status">Inactive</span>
                                     </span>
 
-                                    {% endif %}
-                                    </td>
-                                    <td>{{ foo.active_till }}</td>
-                                    <td>{{ foo.created_by.f_name }}</td>
-                                    <td>{{ foo.created_by.access_level.access_level }}</td>
-                                    <td>{{ foo.created_at }}</td>
-                                    <td class="text-right">
-                                        <div class="dropdown">
-                                            <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
-                                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                <i class="fas fa-ellipsis-v"></i>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                {% if u.access_level.id == 4 %}
-                                                    <a class="dropdown-item disabled"
-                                                       href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
-                                                        Questionnaire</a>
-                                                    <a class="dropdown-item disabled"
-                                                       href="{% url 'questions' q_id=foo.id %}">Edit
-                                                        Questions</a>
-                                                {% elif foo.created_by.access_level.id == 2 %}
-                                                    <a class="dropdown-item"
-                                                       href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
-                                                        Questionnaire</a>
-                                                    <a class="dropdown-item"
-                                                       href="{% url 'questions' q_id=foo.id %}">Edit
-                                                        Questions</a>
-                                                {% elif foo.created_by.access_level.id != u.access_level.id %}
-                                                    <a class="dropdown-item disabled"
-                                                       href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
-                                                        Questionnaire</a>
-                                                    <a class="dropdown-item disabled"
-                                                       href="{% url 'questions' q_id=foo.id %}">Edit
-                                                        Questions</a>
-                                                {% else %}
-                                                    <a class="dropdown-item"
-                                                       href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
-                                                        Questionnaire</a>
-                                                    <a class="dropdown-item"
-                                                       href="{% url 'questions' q_id=foo.id %}">Edit
-                                                        Questions</a>
+                                            {% endif %}
+                                            </td>
+                                            <td>{{ foo.active_till }}</td>
+                                            <td>{{ foo.created_by.f_name }}</td>
+                                            <td>{{ foo.created_by.access_level.access_level }}</td>
+                                            <td>{{ foo.created_at }}</td>
+                                            {% if u.access_level.id == 5 %}
+                                                {% if perms.survey.change_questionnaire %}
+                                                    <td class="text-right">
+                                                        <div class="dropdown">
+                                                            <a class="btn btn-sm btn-icon-only text-light" href="#"
+                                                               role="button"
+                                                               data-toggle="dropdown" aria-haspopup="true"
+                                                               aria-expanded="false">
+                                                                <i class="fas fa-ellipsis-v"></i>
+                                                            </a>
+                                                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                                                                {% if foo.created_by.access_level.id == 2 %}
+                                                                    <a class="dropdown-item"
+                                                                       href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                                        Questionnaire</a>
+                                                                    <a class="dropdown-item"
+                                                                       href="{% url 'questions' q_id=foo.id %}">Edit
+                                                                        Questions</a>
+                                                                {% elif foo.created_by.access_level.id != u.access_level.id %}
+                                                                    <a class="dropdown-item disabled"
+                                                                       href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                                        Questionnaire</a>
+                                                                    <a class="dropdown-item disabled"
+                                                                       href="{% url 'questions' q_id=foo.id %}">Edit
+                                                                        Questions</a>
+                                                                {% else %}
+                                                                    <a class="dropdown-item"
+                                                                       href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                                        Questionnaire</a>
+                                                                    <a class="dropdown-item"
+                                                                       href="{% url 'questions' q_id=foo.id %}">Edit
+                                                                        Questions</a>
+                                                                {% endif %}
+
+                                                            </div>
+                                                        </div>
+                                                    </td>
                                                 {% endif %}
+                                            {% else %}
+                                                <td class="text-right">
+                                                    <div class="dropdown">
+                                                        <a class="btn btn-sm btn-icon-only text-light" href="#"
+                                                           role="button"
+                                                           data-toggle="dropdown" aria-haspopup="true"
+                                                           aria-expanded="false">
+                                                            <i class="fas fa-ellipsis-v"></i>
+                                                        </a>
+                                                        <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                                                            {% if u.access_level.id == 4 %}
+                                                                <a class="dropdown-item disabled"
+                                                                   href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                                    Questionnaire</a>
+                                                                <a class="dropdown-item disabled"
+                                                                   href="{% url 'questions' q_id=foo.id %}">Edit
+                                                                    Questions</a>
+                                                            {% elif foo.created_by.access_level.id == 2 %}
+                                                                <a class="dropdown-item"
+                                                                   href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                                    Questionnaire</a>
+                                                                <a class="dropdown-item"
+                                                                   href="{% url 'questions' q_id=foo.id %}">Edit
+                                                                    Questions</a>
+                                                            {% elif foo.created_by.access_level.id != u.access_level.id %}
+                                                                <a class="dropdown-item disabled"
+                                                                   href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                                    Questionnaire</a>
+                                                                <a class="dropdown-item disabled"
+                                                                   href="{% url 'questions' q_id=foo.id %}">Edit
+                                                                    Questions</a>
+                                                            {% else %}
+                                                                <a class="dropdown-item"
+                                                                   href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                                    Questionnaire</a>
+                                                                <a class="dropdown-item"
+                                                                   href="{% url 'questions' q_id=foo.id %}">Edit
+                                                                    Questions</a>
+                                                            {% endif %}
 
-                                            </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr class="fold">
-                                    <td colspan="7">
-                                        <div class="fold-content">
-                                            <h3>Questionnaire Desscription</h3>
-                                            <p>{{ foo.description }}.</p></div>
-                                    </td>
-                                </tr>
-                            {% endfor %}
-                        {% else %}
-                            <tr class="mx-3 text-center text-orange">
-                                <td colspan="6">No Records</td>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            {% endif %}
+                                        </tr>
+                                        <tr class="fold">
+                                            <td colspan="7">
+                                                <div class="fold-content">
+                                                    <h3>Questionnaire Desscription</h3>
+                                                    <p>{{ foo.description }}.</p></div>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% else %}
+                                    <tr class="mx-3 text-center text-orange">
+                                        <td colspan="6">No Records</td>
+                                    </tr>
+                                {% endif %}
+
+                                </tbody>
+                            </table>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="table-responsive">
+                        <p class="mx-3" style="text-align: right">
+                            <i class="ni ni-spaceship text-indigo"></i> Questionnaire count: {{ count }}
+                        </p>
+                        <table class="table align-items-center table-flush fold-table">
+                            <thead class="thead-light">
+                            <tr>
+                                <th>Name</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Active till</th>
+                                <th scope="col">Created by</th>
+                                <th scope="col">Access Level</th>
+                                <th scope="col">Created at</th>
+                                <th scope="col"></th>
                             </tr>
-                        {% endif %}
+                            </thead>
+                            <tbody class="list">
+                            {% if count > 0 %}
+                                {% for foo in quest %}
+                                    <tr class="view">
+                                        <td>{{ foo.name }}</td>
+                                        <td>{% if foo.is_active %}
+                                            <span class="badge badge-dot mr-4">
+                                        <i class="bg-success"></i>
+                                        <span class="status">Active</span>
+                                    </span>
+                                        {% else %}
+                                            <span class="badge badge-dot mr-4">
+                                        <i class="bg-warning"></i>
+                                        <span class="status">Inactive</span>
+                                    </span>
 
-                        </tbody>
-                    </table>
-                </div>
+                                        {% endif %}
+                                        </td>
+                                        <td>{{ foo.active_till }}</td>
+                                        <td>{{ foo.created_by.f_name }}</td>
+                                        <td>{{ foo.created_by.access_level.access_level }}</td>
+                                        <td>{{ foo.created_at }}</td>
+                                        <td class="text-right">
+                                            <div class="dropdown">
+                                                <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
+                                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                                                    {% if u.access_level.id == 4 %}
+                                                        <a class="dropdown-item disabled"
+                                                           href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                            Questionnaire</a>
+                                                        <a class="dropdown-item disabled"
+                                                           href="{% url 'questions' q_id=foo.id %}">Edit
+                                                            Questions</a>
+                                                    {% elif foo.created_by.access_level.id == 2 %}
+                                                        <a class="dropdown-item"
+                                                           href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                            Questionnaire</a>
+                                                        <a class="dropdown-item"
+                                                           href="{% url 'questions' q_id=foo.id %}">Edit
+                                                            Questions</a>
+                                                    {% elif foo.created_by.access_level.id != u.access_level.id %}
+                                                        <a class="dropdown-item disabled"
+                                                           href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                            Questionnaire</a>
+                                                        <a class="dropdown-item disabled"
+                                                           href="{% url 'questions' q_id=foo.id %}">Edit
+                                                            Questions</a>
+                                                    {% else %}
+                                                        <a class="dropdown-item"
+                                                           href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                            Questionnaire</a>
+                                                        <a class="dropdown-item"
+                                                           href="{% url 'questions' q_id=foo.id %}">Edit
+                                                            Questions</a>
+                                                    {% endif %}
+
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr class="fold">
+                                        <td colspan="7">
+                                            <div class="fold-content">
+                                                <h3>Questionnaire Desscription</h3>
+                                                <p>{{ foo.description }}.</p></div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr class="mx-3 text-center text-orange">
+                                    <td colspan="6">No Records</td>
+                                </tr>
+                            {% endif %}
+
+                            </tbody>
+                        </table>
+                    </div>
+                {% endif %}
                 <!-- Card footer -->
 
                 <div class="card-footer py-4">

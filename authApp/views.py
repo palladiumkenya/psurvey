@@ -1,9 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.models import Permission
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import transaction
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django.views.decorators.csrf import csrf_exempt
@@ -211,6 +213,62 @@ def register_partner(request):
         'p_users': partner_users,
     }
     return render(request, 'authApp/new_partner_link.html', context)
+
+
+@login_required
+# @permission_required('survey.add_users')
+def register_partner_user(request):
+    u = request.user
+    if u.access_level.id == 5:
+        if not request.user.has_perm('survey.view_users'):
+            raise PermissionDenied
+    elif u.access_level.id != 2:
+        raise PermissionDenied
+    if request.method == 'POST':
+        trans_one = transaction.savepoint()
+        f_name = request.POST.get('f_name')
+        l_name = request.POST.get('l_name')
+        email = request.POST.get('email')
+        msisdn = request.POST.get('msisdn')
+        password = request.POST.get('password')
+        re_password = request.POST.get('re_password')
+        partner = request.POST.getlist('partner-user')
+        if password != re_password:
+            return HttpResponse("Password error")
+        print(partner)
+        user = Users.objects.create_user(msisdn=msisdn, password=password, email=email)
+        user.f_name = f_name
+        user.l_name = l_name
+        user.access_level_id = 5
+        print(user.id)
+        user.save()
+        try:
+            admin = Partner_User.objects.create(name=Partner_User.objects.get(user=u).name, user=user, created_by=u)
+            admin.save()
+            for par in partner:
+                user.user_permissions.add(Permission.objects.get(id=par))
+                user.user_permissions.all()
+        except IntegrityError:
+            transaction.savepoint_rollback(trans_one)
+            return HttpResponse("error")
+
+    partner_users = Partner_User.objects.filter(name=Partner_User.objects.get(user=u).name, user__access_level__id=5)
+    perm = Permission.objects.filter(Q(name__contains='Can add questionnaire') |
+                                     Q(name__contains='Can change questionnaire') |
+                                     Q(name__contains='Can delete questionnaire') |
+                                     Q(name__contains='Can view questionnaire') |
+                                     Q(name__exact='Can add partner') |
+                                     Q(name__exact='Can change partner') |
+                                     Q(name__exact='Can delete partner') |
+                                     Q(name__exact='Can view partner') )
+                                     # | Q(name__contains=''))
+
+    context = {
+        'u': u,
+        'perm': perm,
+        'p_users': partner_users,
+    }
+    return render(request, 'authApp/new_partner_user.html', context)
 
 
 @login_required

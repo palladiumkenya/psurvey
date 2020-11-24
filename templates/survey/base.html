@@ -133,6 +133,10 @@
                                 </a>
                             {% endif %}
                             {% if u.access_level_id == 2 %}
+                                <a class="nav-link " href="{% url 'register-partner-user' %}  ">
+                                    <i class="ni ni-badge text-black-50"></i>
+                                    <span class="nav-link-text">Parnter Users</span>
+                                </a>
                                 <a class="nav-link " href="{% url 'list-fac-admin' %}  ">
                                     <i class="ni ni-compass-04 text-black-50"></i>
                                     <span class="nav-link-text">Faciity Administrators</span>

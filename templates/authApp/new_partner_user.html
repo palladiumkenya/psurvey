@@ -1,7 +1,7 @@
 {% extends 'survey/base.html' %}
 {% load static %}
 {% block title %}
-    New Partner Facility Link
+    New Partner User
 {% endblock %}
 {% block headscript %}
     <link href="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.css" rel="stylesheet">
@@ -38,32 +38,42 @@
                     <img src="{% static 'authApp/img/theme/img-1-1000x600.jpg' %}" alt="Image placeholder"
                          class="card-img-top">
                     <div class="card-header border-0">
-                        <h3 class="mb-0">Partner Facility Link</h3>
+                        <h3 class="mb-0">Partner Users</h3>
                     </div>
                     <div class="card-body pt-0">
-                        <form id="link-form" method="post" action="{% url 'facility-partner-link' %}">
-                            {% csrf_token %}
-                            <div class="form-group">
-                                <label class="form-control-label" for="partner">Partner Name</label>
-                                <input type="text" id="partner" name="partner" class="form-control"
-                                       placeholder="Partner abc" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-control-label" for="facility">Facilities</label>
-                                <div>
-                                    <select multiple="multiple" class="form-control" name="facility" id="facility"
-                                            placeholder="Facilities" onchange="county()" required>
-                                        {% for foo in fac %}
-                                            <option value="{{ foo.id }}">{{ foo.name }} | {{ foo.county }} | {{ foo.sub_county }}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-                            <hr class="my-4"/>
-                            <button type="submit" class="btn btn-success">Save</button>
-                            <button type="button" class="btn btn-danger">Cancel</button>
-
-                        </form>
+                        {% if perms.survey.view_users or u.access_level.id == 2 %}
+                            <table class="table align-items-center table-flush table-dark">
+                                <thead>
+                                <th>Name</th>
+                                <th>Mobile</th>
+                                <th></th>
+                                </thead>
+                                <tbody>
+                                {% for i in p_users %}
+                                    <tr>
+                                        <td>{{ i.user.f_name }} {{ i.user.l_name }}</td>
+                                        <td>{{ i.user.msisdn }}</td>
+                                        {% if perms.survey.change_users or u.access_level.id == 2 %}
+                                            <td class="text-right">
+                                                <div class="dropdown">
+                                                    <a class="btn btn-sm btn-icon-only text-light" href="#"
+                                                       role="button"
+                                                       data-toggle="dropdown" aria-haspopup="true"
+                                                       aria-expanded="false">
+                                                        <i class="fas fa-ellipsis-v"></i>
+                                                    </a>
+                                                    <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                                                        <a class="dropdown-item"
+                                                           href=".">Edit User</a>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        {% endif %}
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        {% endif %}
 
                     </div>
                 </div>
@@ -75,83 +85,88 @@
                         <h3 class="mb-0">Create Partner User Account</h3>
                     </div>
                     <div class="card-body">
-                        <form class="form-group" id="new_partner" method="post" action="{% url 'register-partner' %}">
-                            {% csrf_token %}
-                            <h6 class="heading-small text-muted mb-4">Personal information</h6>
-                            <div class="pl-lg-4">
-                                <div class="row">
-                                    <div class="col-lg-6">
-                                        <div class="form-group">
-                                            <label class="form-control-label" for="f_name">First Name</label>
-                                            <input type="text" id="f_name" name="f_name" class="form-control"
-                                                   placeholder="John" required>
+                        {% if perms.survey.add_users or u.access_level.id == 2 %}
+                            <form class="form-group" id="new_partner" method="post"
+                                  action="{% url 'register-partner-user' %}">
+                                {% csrf_token %}
+                                <h6 class="heading-small text-muted mb-4">Personal information</h6>
+                                <div class="pl-lg-4">
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="f_name">First Name</label>
+                                                <input type="text" id="f_name" name="f_name" class="form-control"
+                                                       placeholder="John" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="l_name">Last Name</label>
+                                                <input type="text" id="l_name" name="l_name" class="form-control"
+                                                       placeholder="Doe" required>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-lg-6">
-                                        <div class="form-group">
-                                            <label class="form-control-label" for="l_name">Last Name</label>
-                                            <input type="text" id="l_name" name="l_name" class="form-control"
-                                                   placeholder="Doe" required>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="email">Email</label>
+                                                <input type="email" id="email" name="email" class="form-control"
+                                                       placeholder="a@b.c" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="msisdn">Mobile Number</label>
+                                                <input type="tel" id="msisdn" name="msisdn" class="form-control"
+                                                       placeholder="0700000000" required>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-lg-6">
-                                        <div class="form-group">
-                                            <label class="form-control-label" for="email">Email</label>
-                                            <input type="email" id="email" name="email" class="form-control"
-                                                   placeholder="a@b.c" required>
+                                    <div class="row">
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="password">Password</label>
+                                                <input type="password" id="password" name="password"
+                                                       class="form-control"
+                                                       placeholder="password" required>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <div class="form-group">
+                                                <label class="form-control-label" for="re_password">Confirm
+                                                    password</label>
+                                                <input type="password" id="re_password" name="re_password"
+                                                       class="form-control"
+                                                       placeholder="confirm password" required>
+                                            </div>
                                         </div>
                                     </div>
-                                    <div class="col-lg-6">
-                                        <div class="form-group">
-                                            <label class="form-control-label" for="msisdn">Mobile Number</label>
-                                            <input type="tel" id="msisdn" name="msisdn" class="form-control"
-                                                   placeholder="0700000000" required>
+                                    <hr class="my-4"/>
+                                    <h6 class="heading-small text-muted mb-4">User permissions</h6>
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="partner-user">User permissions</label>
+                                        <div class="row">
+                                            <div class="col-lg-6">
+                                                <select class="form-control" name="partner-user" id="partner-user"
+                                                        placeholder="Permissions" multiple required>
+                                                    {% for foo in perm %}
+                                                        <option value="{{ foo.id }}">{{ foo.name }}</option>
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col-lg-6">
-                                        <div class="form-group">
-                                            <label class="form-control-label" for="password">Password</label>
-                                            <input type="password" id="password" name="password" class="form-control"
-                                                   placeholder="password" required>
-                                        </div>
-                                    </div>
-                                    <div class="col-lg-6">
-                                        <div class="form-group">
-                                            <label class="form-control-label" for="re_password">Confirm password</label>
-                                            <input type="password" id="re_password" name="re_password"
-                                                   class="form-control"
-                                                   placeholder="confirm password" required>
-                                        </div>
-                                    </div>
+
+
                                 </div>
                                 <hr class="my-4"/>
-                                <h6 class="heading-small text-muted mb-4">Partner information</h6>
-                                <div class="form-group">
-                                    <label class="form-control-label" for="partner-user">Partner level Users</label>
-                                <div class="row">
-                                    <div class="col-lg-6">
-                                        <select class="form-control" name="partner-user" id="partner-user"
-                                                placeholder="Partner User" required>
-                                            {% for foo in p_users %}
-                                                <option value="{{ foo.id }}">{{ foo.name }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                                </div>
+                                <button type="submit" class="btn btn-success">Save</button>
+                                <button type="button" class="btn btn-danger">Cancel</button>
 
 
-                            </div>
-                            <hr class="my-4"/>
-                            <button type="submit" class="btn btn-success">Save</button>
-                            <button type="button" class="btn btn-danger">Cancel</button>
-
-
-                        </form>
+                            </form>
+                        {% endif %}
                     </div>
                     <!-- Card footer -->
                     <nav aria-label="...">
@@ -289,7 +304,6 @@
             });
 
         });
-
 
 
     </script>
