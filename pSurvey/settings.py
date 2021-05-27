@@ -89,7 +89,7 @@ DATABASES = {
         'NAME': 'pSurvey',
         'USER': 'nishauri',
         'PASSWORD': 'nishauri',
-        'HOST': 'localhost',  # Or an IP Address that your DB is hosted on
+        'HOST': '197.232.82.136',  # Or an IP Address that your DB is hosted on
         'PORT': '5432',
     }
 }
