@@ -139,7 +139,6 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-#pSurvey/static/
 source/_static/
 source/_templates/
 .idea/pSurvey_api.iml
