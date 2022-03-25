@@ -51,3 +51,9 @@ To run the tests, `cd` into the directory where `manage.py` is:
 ```sh
 (env)$ python manage.py test
 ```
+
+## Docker set up
+    git clone https://github.com/palladiumkenya/psurvey.git
+    cd psurvey
+    docker-compose up -d
+    You can now access the server at http://localhost:9100
