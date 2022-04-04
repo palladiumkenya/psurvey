@@ -299,6 +299,26 @@ def index(request):
             'resp': resp,
         }
         return render(request, 'survey/dashboard.html', context)
+    elif user.access_level.id == 5:
+        fac = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
+            partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True)).values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
+
+        quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True)
+                                                      ).values_list('questionnaire').distinct()
+        aq = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
+                                                   questionnaire__is_active=True,
+                                                   questionnaire__active_till__gte=date.today()
+                                                   ).values_list('questionnaire').distinct()
+
+        resp = End_Questionnaire.objects.filter(questionnaire__in=quest)
+        context = {
+            'u': user,
+            'fac': fac,
+            'quest': quest,
+            'aq': aq,
+            'resp': resp,
+        }
+        return render(request, 'survey/dashboard.html', context)
 
 
 def resp_chart(request):
