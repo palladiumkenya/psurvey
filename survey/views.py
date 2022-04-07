@@ -320,7 +320,6 @@ def index(request):
         }
         return render(request, 'survey/dashboard.html', context)
 
-
 def resp_chart(request):
     start = request.POST.get('start_date')
     end = request.POST.get('end_date')
