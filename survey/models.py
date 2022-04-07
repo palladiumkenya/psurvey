@@ -1,4 +1,5 @@
 from datetime import datetime
+from urllib import response
 
 from django.db import models
 from authApp.models import Facility, Users
@@ -37,6 +38,15 @@ class Answer (models.Model):
 
     class Meta:
         db_table = "Answers"
+
+
+class QuestionDependance (models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    answer = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name='response_id')
+
+
+    class Meta:
+        db_table = "QuestionDependance"
 
 
 class Started_Questionnaire (models.Model):
