@@ -171,10 +171,10 @@
             q_type.on('change', function () {
                 if ( this.value == '1'){
                     $("#shows").hide();
-                    document.getElementById("answers").required = true;
+                    document.getElementById("answers").required = false;
                 } else {
                     $("#shows").show();
-                    document.getElementById("answers").required = false;
+                    document.getElementById("answers").required = true;
                 }
             });
             prev_dep.on('change', function () {

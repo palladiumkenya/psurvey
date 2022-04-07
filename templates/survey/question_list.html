@@ -42,6 +42,7 @@
                     <table class="table align-items-center table-flush table-dark">
                         <thead class="thead-dark">
                         <tr>
+                            <th scope="col">Question Order</th>
                             <th scope="col">Question</th>
                             <th scope="col">Question Type</th>
                             <th scope="col">User</th>
@@ -53,6 +54,7 @@
                         <tbody class="list">
                         {% for foo in quest %}
                             <tr>
+                                <td>{{ foo.question_order }}</td>
                                 <td>{{ foo.question }}</td>
                                 <td>
                                     {% if foo.question_type == 1 %}
