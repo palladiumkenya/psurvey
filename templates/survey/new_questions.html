@@ -68,6 +68,27 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="question_order">Question Order</label>
+                                        <select class="form-control" name="question_order" id="q_type" required>
+                                            <option value="" disabled selected hidden>Choose One...</option>
+                                            {% for i in question_order %}
+                                                <option value="{{i}}">{{i}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="q_type">Dependent on Previous Response</label>
+                                        <select class="form-control" name="q_type" id="q_type" required>
+                                            <option value="" disabled selected hidden>Choose One...</option>
+                                            <option value="1">Yes</option>
+                                            <option value="2">No</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                             <div class="row">
                                 <div class="col-lg-9">
@@ -143,6 +164,7 @@
                                 icon: 'success'
                             });
                             qForm[0].reset();
+                            window.location.reload();
                         }
                     },
                     error: function (er) {

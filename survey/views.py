@@ -1,3 +1,4 @@
+from itertools import filterfalse
 import json
 from datetime import date
 
@@ -434,17 +435,16 @@ def new_questionnaire(request):
         desc = request.POST.get('description')
         dateTill = request.POST.get('date-till')
         isActive = request.POST.get('isActive')
+        num_questions = request.POST.get('num_questions')
 
         if isActive == "inactive":
             isActive = False
         else:
             isActive = True
-        create_quest = Questionnaire.objects.create(name=name, is_active=isActive, description=desc,
-                                                    active_till=dateTill, created_by=request.user)
-        create_quest.save()
         trans_one = transaction.savepoint()
+        create_quest = Questionnaire.objects.create(name=name, is_active=isActive, description=desc, active_till=dateTill, created_by=request.user, number_of_questions=num_questions)
+        create_quest.save()
         q_id = create_quest.pk
-        print(q_id)
 
         if q_id:
             try:
@@ -489,6 +489,7 @@ def edit_questionnaire(request, q_id):
         desc = request.POST.get('description')
         dateTill = request.POST.get('date-till')
         isActive = request.POST.get('isActive')
+        num_questions = request.POST.get('num_questions')
 
         if isActive == "inactive":
             isActive = False
@@ -502,6 +503,7 @@ def edit_questionnaire(request, q_id):
         create_quest.is_active = isActive
         create_quest.description = desc
         create_quest.active_till = dateTill
+        create_quest.number_of_questions = num_questions
 
         create_quest.save()
 
@@ -711,13 +713,15 @@ def add_question(request, q_id):
         question = request.POST.get('question')
         q_type = request.POST.get('q_type')  # For q_type 1 is opened ended 2 Radio 3 is Checkbox
         answers = request.POST.get('answers')
+        question_order = request.POST.get('question_order')
+        
         if q_type == '1':
             answers = "Open Text"
         answers_list = answers.split(',')
         print(question, q_type, answers_list)
 
         q_save = Question.objects.create(question=question, question_type=q_type, created_by=user,
-                                         questionnaire_id=q_id)
+                                         questionnaire_id=q_id, question_order=question_order)
         trans_one = transaction.savepoint()
         question_id = q_save.pk
 
@@ -738,9 +742,17 @@ def add_question(request, q_id):
         Questionnaire.objects.get(id=q_id)
     except Questionnaire.DoesNotExist:
         raise Http404('Questionnaire does not exist')
+    questionnaire = Questionnaire.objects.get(id=q_id)
+    question_number = []
+    for i in range(1, questionnaire.number_of_questions + 1):
+        question_number.append(i)
+    question_order = Question.objects.filter(questionnaire_id=q_id).values_list('question_order', flat=True).order_by('question_order')
+    print(list(filterfalse(list(question_order).__contains__, question_number)))
+    
     context = {
         'u': u,
-        'questionnaire': q_id
+        'questionnaire': q_id,
+        'question_order': list(filterfalse(list(question_order).__contains__, question_number)),
     }
     return render(request, 'survey/new_questions.html', context)
 
