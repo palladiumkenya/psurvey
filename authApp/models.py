@@ -86,7 +86,7 @@ class Partner_User (models.Model):
 
 class Partner_Facility (models.Model):
     partner = models.ForeignKey(Partner, on_delete=models.CASCADE)
-    facility = models.OneToOneField(Facility, on_delete=models.CASCADE)
+    facility = models.ForeignKey(Facility, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='link_created_by', default=1)
 
