@@ -66,6 +66,7 @@ def web_login(request):
         if form.is_valid():
             clean = form.cleaned_data
             user = authenticate(username=clean['msisdn'], password=clean['password'])
+            print(user)
             if user is not None:
                 if user.is_active:
                     if user.access_level.id != 1:
