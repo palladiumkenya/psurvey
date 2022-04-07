@@ -52,7 +52,7 @@ def active_questionnaire_api(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def all_question_api(request):
-    quest = Question.objects.filter(questionnaire_id=request.data['questionnaire_id'])
+    quest = Question.objects.filter(questionnaire_id=request.data['questionnaire_id']).order_by('question_order')
     serializer = QuestionSerializer(quest, many=True)
 
     return Res({"data": serializer.data}, status.HTTP_200_OK)
@@ -70,7 +70,7 @@ def list_question_api(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def get_consent(request):
-    quest = Question.objects.filter(questionnaire_id=request.data['questionnaire_id'])[:1]
+    quest = Question.objects.filter(questionnaire_id=request.data['questionnaire_id']).order_by('question_order')[:1]
     a_id = 0
     for q in quest:
         a_id =q.id
@@ -130,7 +130,6 @@ def start_questionnaire_new(request, q_id):
 
 
 @api_view(['POST'])
-@permission_classes([IsAuthenticated])
 def answer_question(request):
     q = Question.objects.get(id=request.data['question'])
 
@@ -185,6 +184,7 @@ def answer_question(request):
             else:
                 return Res({"success": False, "error": serializer.errors}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
+            print("error", e)
             return Res(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     return data
@@ -194,7 +194,16 @@ def check_answer_algo(ser):
     ser.save()
     q = Question.objects.get(id=ser.data['question'])
     quest = Questionnaire.objects.get(id=q.questionnaire_id)
-    questions = Question.objects.filter(questionnaire=quest)
+    question_depends_on = QuestionDependance.objects.filter(
+            question__in=Question.objects.filter(questionnaire=quest).order_by("question_order")
+        ).exclude(
+            answer_id__in=Response.objects.filter(session_id=ser.data['session']).values_list('answer_id', flat=True)
+        )
+    
+    if question_depends_on.exists():
+        questions = Question.objects.filter(questionnaire=quest).order_by("question_order").exclude(id__in=question_depends_on.values_list('question_id', flat=True))
+    else:
+        questions = Question.objects.filter(questionnaire=quest).order_by("question_order")
 
     foo = q
     previous = next_ = None
@@ -823,7 +832,7 @@ def question_list(request, q_id):
     user = request.user
     u = user
     if user.access_level.id == 3:
-        quest = Question.objects.filter(questionnaire_id=q_id).order_by('-created_at')
+        quest = Question.objects.filter(questionnaire_id=q_id).order_by('question_order')
         context = {
             'u': u,
             'quest': quest,
@@ -833,7 +842,7 @@ def question_list(request, q_id):
         return render(request, 'survey/question_list.html', context)
     elif user.access_level.id == 2:
         try:
-            quest = Question.objects.filter(questionnaire=Questionnaire.objects.get(id=q_id)).order_by('-created_at')
+            quest = Question.objects.filter(questionnaire=Questionnaire.objects.get(id=q_id)).order_by('question_order')
         except Questionnaire.DoesNotExist:
             raise Http404("Questionnaire Does not exist")
         if Questionnaire.objects.get(id=q_id).created_by.access_level.id == 3:

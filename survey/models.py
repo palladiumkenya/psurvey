@@ -32,7 +32,7 @@ class Question (models.Model):
 
 class Answer (models.Model):
     question= models.ForeignKey(Question, on_delete=models.CASCADE)
-    option = models.CharField(max_length=255)
+    option = models.CharField(max_length=455)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(Users, on_delete=models.CASCADE, default=1)
 
@@ -61,7 +61,7 @@ class Started_Questionnaire (models.Model):
 
 class Response (models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
+    answer = models.ForeignKey(Answer, on_delete=models.CASCADE, null=True)
     open_text = models.CharField(max_length=150, blank=True, null=True)
     session = models.ForeignKey(Started_Questionnaire, on_delete=models.CASCADE, default=1)
     created_at = models.DateField(auto_now_add=True)
