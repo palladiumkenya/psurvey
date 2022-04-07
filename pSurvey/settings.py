@@ -87,10 +87,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'pSurvey',
-        'USER': 'nishauri',
-        'PASSWORD': 'nishauri',
-        'HOST': '197.232.82.136',  # Or an IP Address that your DB is hosted on
-        'PORT': '5432',
+        'USER': 'medyq_user',
+        'PASSWORD': 'j#3ank2UW+r!tj73',
+        'HOST': '41.220.229.138',  # Or an IP Address that your DB is hosted on
+        'PORT': '2210',
     }
 }
 
