@@ -1,4 +1,5 @@
 from datetime import datetime
+from urllib import response
 
 from django.db import models
 from authApp.models import Facility, Users
@@ -10,6 +11,7 @@ class Questionnaire (models.Model):
     is_active = models.BooleanField(default=True)
     created_by = models.ForeignKey(Users, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+    number_of_questions = models.IntegerField(default=1)
     active_till = models.DateField(default=datetime.now)
 
     class Meta:
@@ -18,8 +20,9 @@ class Questionnaire (models.Model):
 
 class Question (models.Model):
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
-    question =  models.CharField(max_length=150)
+    question =  models.CharField(max_length=500)
     question_type = models.IntegerField()
+    question_order = models.IntegerField(default=1)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(Users, on_delete=models.CASCADE)
 
@@ -29,12 +32,21 @@ class Question (models.Model):
 
 class Answer (models.Model):
     question= models.ForeignKey(Question, on_delete=models.CASCADE)
-    option = models.CharField(max_length=20)
+    option = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(Users, on_delete=models.CASCADE, default=1)
 
     class Meta:
         db_table = "Answers"
+
+
+class QuestionDependance (models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    answer = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name='response_id')
+
+
+    class Meta:
+        db_table = "QuestionDependance"
 
 
 class Started_Questionnaire (models.Model):

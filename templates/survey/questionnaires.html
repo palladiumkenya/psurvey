@@ -117,6 +117,7 @@
                                     <th scope="col">Active till</th>
                                     <th scope="col">Created by</th>
                                     <th scope="col">Access Level</th>
+                                    <th scope="col">Number of Questions</th>
                                     <th scope="col">Created at</th>
                                     <th scope="col"></th>
                                 </tr>
@@ -142,6 +143,7 @@
                                             <td>{{ foo.active_till }}</td>
                                             <td>{{ foo.created_by.f_name }}</td>
                                             <td>{{ foo.created_by.access_level.access_level }}</td>
+                                            <td>{{ foo.number_of_questions }}</td>
                                             <td>{{ foo.created_at }}</td>
                                             {% if u.access_level.id == 5 %}
                                                 {% if perms.survey.change_questionnaire %}
@@ -229,7 +231,7 @@
                                         <tr class="fold">
                                             <td colspan="7">
                                                 <div class="fold-content">
-                                                    <h3>Questionnaire Desscription</h3>
+                                                    <h3>Questionnaire Description</h3>
                                                     <p>{{ foo.description }}.</p></div>
                                             </td>
                                         </tr>
@@ -257,6 +259,7 @@
                                 <th scope="col">Active till</th>
                                 <th scope="col">Created by</th>
                                 <th scope="col">Access Level</th>
+                                <th scope="col">Number of Questions</th>
                                 <th scope="col">Created at</th>
                                 <th scope="col"></th>
                             </tr>
@@ -282,6 +285,7 @@
                                         <td>{{ foo.active_till }}</td>
                                         <td>{{ foo.created_by.f_name }}</td>
                                         <td>{{ foo.created_by.access_level.access_level }}</td>
+                                            <td>{{ foo.number_of_questions }}</td>
                                         <td>{{ foo.created_at }}</td>
                                         <td class="text-right">
                                             <div class="dropdown">
@@ -327,7 +331,7 @@
                                     <tr class="fold">
                                         <td colspan="7">
                                             <div class="fold-content">
-                                                <h3>Questionnaire Desscription</h3>
+                                                <h3>Questionnaire Description</h3>
                                                 <p>{{ foo.description }}.</p></div>
                                         </td>
                                     </tr>

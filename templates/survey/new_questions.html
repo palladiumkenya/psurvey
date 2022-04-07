@@ -14,7 +14,7 @@
 {% endblock %}
 {% block breadcrumb %}
 
-    <h6 class="h6 text-white d-inline-block mb-0">New question</h6>
+    <h6 class="h6 text-white d-inline-block mb-0">New Question</h6>
     <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
         <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
             <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i></a></li>
@@ -47,7 +47,7 @@
                     <form class="form-group" id="questForm" method="post"
                           action="{% url 'add-question' q_id=questionnaire %}">
                         {% csrf_token %}
-                        <h6 class="heading-small text-muted mb-4">Question information</h6>
+                        <h6 class="heading-small text-muted mb-4">Question Information</h6>
                         <div class="pl-lg-4">
                             <div class="row">
                                 <div class="col-lg-6">
@@ -68,14 +68,61 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="question_order">Question Order</label>
+                                        <select class="form-control" name="question_order" id="q_type" required>
+                                            <option value="" disabled selected hidden>Choose One...</option>
+                                            {% for i in question_order %}
+                                                <option value="{{i}}">{{i}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="prev_dep">Dependent on Previous Response</label>
+                                        <select class="form-control" name="prev_dep" id="prev_dep" required>
+                                            <option value="" disabled selected hidden>Choose One...</option>
+                                            <option value="1">Yes</option>
+                                            <option value="2">No</option>
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                             <div class="row">
-                                <div class="col-lg-9">
+                                <div class="col-lg-12">
                                     <div class="form-group" id="shows" style="display: none">
                                         <label class="form-control-label" for="answers">Answer Options</label>
-                                        <small class="text-blue text-right">Enter answers separated by Commas</small>
+                                        <small class="text-blue text-right">Enter answers separated by commas</small>
                                         <input type="text" id="answers" name="answers" class="form-control"
                                                placeholder="Answers">
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="form2" style="display: none">
+                            <hr/>
+                                <label class="form-control-label h5">Parent Question</label><br/>
+                                <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label " for="parent_question">Question </label>
+                                        <select class="form-control" name="parent_question" id="parent_question">
+                                            <option value="" disabled selected hidden>Choose One...</option>
+                                            {% for i in questions %}
+                                                <option value="{{i.id}}">{{i.question_order}}. {{i.question}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="parent_response">Response</label>
+                                        <select class="form-control" name="parent_response" id="parent_response">
+                                            <option value="" disabled selected hidden>Choose One...</option>
+                                        
+                                        </select>
+                                    </div>
                                     </div>
                                 </div>
                             </div>
@@ -100,13 +147,45 @@
     <script>
         var qForm = $("#questForm");
         var q_type = $('#q_type');
+        var prev_dep = $('#prev_dep');
         // qForm.addEventListener('submit', CheckData);
         $(document).ready(function (e) {
+            $('select#parent_question').change(function () {
+                var optionSelected = $(this).find("option:selected");
+                var valueSelected  = optionSelected.val();
+                var country_name   = optionSelected.text();
+
+                $.ajax({
+                    url: `/get/answers/${valueSelected}`,
+                    success: function(result){
+                        console.log(result);
+                        $("#parent_response option").remove();
+                        $("#parent_response").append(`<option value="" disabled selected hidden>Choose One...</option>`);
+                        for (var i = result.length - 1; i >= 0; i--) {
+                            $("#parent_response").append('<option value="'+ result[i].id+'">'+ result[i].option +'</option>');
+                        };
+
+                    }
+                });
+            });
             q_type.on('change', function () {
                 if ( this.value == '1'){
-                   $("#shows").hide();
+                    $("#shows").hide();
+                    document.getElementById("answers").required = true;
                 } else {
                     $("#shows").show();
+                    document.getElementById("answers").required = false;
+                }
+            });
+            prev_dep.on('change', function () {
+                if ( this.value == '1'){
+                    $("#form2").show();
+                    document.getElementById("parent_response").required = true;
+                    document.getElementById("parent_question").required = true;
+                } else {
+                    $("#form2").hide();
+                    document.getElementById("parent_response").required = false;
+                    document.getElementById("parent_question").required = false;
                 }
             });
             qForm.submit(function (e) {
@@ -143,6 +222,7 @@
                                 icon: 'success'
                             });
                             qForm[0].reset();
+                            window.location.reload();
                         }
                     },
                     error: function (er) {

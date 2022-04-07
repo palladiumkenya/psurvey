@@ -16,6 +16,7 @@ urlpatterns = [
     path('resp-chart/', views.resp_chart, name='all-resp-chart'),
     path('trend-chart/', views.trend_chart, name='trend-chart'),
     path('get/facilities/', views.get_fac),
+    path('get/answers/<int:q_id>', views.answers_list),
 
     #Api urls
     path('api/questionnaire/all/', views.all_questionnaire_api, name='questionnaire_api'),
