@@ -14,7 +14,7 @@
 {% endblock %}
 {% block breadcrumb %}
 
-    <h6 class="h6 text-white d-inline-block mb-0">New question</h6>
+    <h6 class="h6 text-white d-inline-block mb-0">New Question</h6>
     <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
         <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
             <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i></a></li>
@@ -47,7 +47,7 @@
                     <form class="form-group" id="questForm" method="post"
                           action="{% url 'add-question' q_id=questionnaire %}">
                         {% csrf_token %}
-                        <h6 class="heading-small text-muted mb-4">Question information</h6>
+                        <h6 class="heading-small text-muted mb-4">Question Information</h6>
                         <div class="pl-lg-4">
                             <div class="row">
                                 <div class="col-lg-6">
@@ -94,7 +94,7 @@
                                 <div class="col-lg-9">
                                     <div class="form-group" id="shows" style="display: none">
                                         <label class="form-control-label" for="answers">Answer Options</label>
-                                        <small class="text-blue text-right">Enter answers separated by Commas</small>
+                                        <small class="text-blue text-right">Enter answers separated by commas</small>
                                         <input type="text" id="answers" name="answers" class="form-control"
                                                placeholder="Answers">
                                     </div>
