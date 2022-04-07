@@ -179,7 +179,10 @@ def register_partner(request):
     u = request.user
     if request.user.access_level.id != 3:
         raise PermissionDenied
-    facilities = Facility.objects.exclude(id__in=Partner_Facility.objects.values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
+    if request.user.access_level.id == 3:
+        facilities = Facility.objects.filter().order_by('county', 'sub_county', 'name')
+    else:
+        facilities = Facility.objects.exclude(id__in=Partner_Facility.objects.values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
     if request.method == 'POST':
         trans_one = transaction.savepoint()
         f_name = request.POST.get('f_name')
@@ -195,7 +198,6 @@ def register_partner(request):
         user.f_name = f_name
         user.l_name = l_name
         user.access_level_id = 2
-        print(user.id)
         user.save()
         try:
             if user.pk:
@@ -277,7 +279,8 @@ def register_fac_admin(request):
     u = request.user
     if request.user.access_level.id != 2:
         raise PermissionDenied
-    facilities = Facility.objects.filter(id__in=Partner_Facility.objects.filter(partner=Partner_User.objects.get(user=u).name).values_list('facility_id', flat=True)).exclude(id__in=Users.objects.filter(access_level_id=4).values_list('facility_id', flat=True)).order_by('name')
+    facilities = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
+        partner=Partner_User.objects.get(user=u).name).values_list('facility_id', flat=True)).order_by('name')
     if request.method == 'POST':
         f_name = request.POST.get('f_name')
         l_name = request.POST.get('l_name')
