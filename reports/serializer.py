@@ -37,8 +37,8 @@ class AllUserSerializer(serializers.ModelSerializer):
 
     def to_representation(self, value):
         data = super().to_representation(value)
-        data.update({'facility': data['facility']['name']})
-        data.update({'designation': data['designation']['name']})
+        data.update({'facility': data['facility']['name'] if data['facility'] else '',})
+        data.update({'designation': data['designation']['name'] if data['designation'] else '',})
         data.update({'cs': End_Questionnaire.objects.filter(session__started_by=data['id']).count()})
         return data
 
