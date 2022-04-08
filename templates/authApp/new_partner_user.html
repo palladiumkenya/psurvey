@@ -1,7 +1,7 @@
 {% extends 'survey/base.html' %}
 {% load static %}
 {% block title %}
-    New Partner User
+    New Organization User
 {% endblock %}
 {% block headscript %}
     <link href="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.css" rel="stylesheet">
@@ -11,15 +11,15 @@
 {% endblock %}
 {% block breadcrumb %}
 
-    <h6 class="h5 text-white d-inline-block mb-0">New partner link</h6>
+    <h6 class="h5 text-white d-inline-block mb-0">New Organization link</h6>
     <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
         <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
             <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="{% url 'facility-partner-list' %}"><small>partner facility list</small></a>
+            <li class="breadcrumb-item"><a href="{% url 'facility-partner-list' %}"><small>organization facility list</small></a>
             </li>
-            <li class="breadcrumb-item"><a href="."><small>new partner link</small></a>
+            <li class="breadcrumb-item"><a href="."><small>new organization link</small></a>
             </li>
-            <li class="breadcrumb-item active" aria-current="page"><small>new partner link</small></li>
+            <li class="breadcrumb-item active" aria-current="page"><small>new organization link</small></li>
         </ol>
     </nav>
 {% endblock %}
@@ -38,7 +38,7 @@
                     <img src="{% static 'authApp/img/theme/img-1-1000x600.jpg' %}" alt="Image placeholder"
                          class="card-img-top">
                     <div class="card-header border-0">
-                        <h3 class="mb-0">Partner Users</h3>
+                        <h3 class="mb-0">Organization Users</h3>
                     </div>
                     <div class="card-body pt-0">
                         {% if perms.survey.view_users or u.access_level.id == 2 %}
@@ -82,7 +82,7 @@
                 <div class="card">
                     <!-- Card header -->
                     <div class="card-header border-0">
-                        <h3 class="mb-0">Create Partner User Account</h3>
+                        <h3 class="mb-0">Create Organization User Account</h3>
                     </div>
                     <div class="card-body">
                         {% if perms.survey.add_users or u.access_level.id == 2 %}
@@ -286,7 +286,7 @@
                             console.log(lForm[0])
                             Swal.fire({
                                 title: 'Success!',
-                                text: 'Partner Details Saved',
+                                text: 'Organization Details Saved',
                                 icon: 'success'
                             });
                             lForm[0].reset();

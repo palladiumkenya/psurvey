@@ -50,8 +50,8 @@ class QuestionDependance (models.Model):
 
 
 class Started_Questionnaire (models.Model):
-    ccc_number = models.CharField(max_length=15)
-    firstname = models.CharField(max_length=30)
+    ccc_number = models.CharField(max_length=15, null=True)
+    firstname = models.CharField(max_length=300, null=True)
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
     started_by = models.ForeignKey(Users, on_delete=models.CASCADE, default=1)
 
