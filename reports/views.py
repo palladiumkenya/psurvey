@@ -102,6 +102,9 @@ class Current_user(viewsets.ModelViewSet):
         if user.access_level.id == 2:
             return Users.objects.filter(facility_id__in=Partner_Facility.objects.filter(
                 partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True)).values_list('facility_id', flat=True), access_level_id=1)
+        if user.access_level.id == 5:
+            return Users.objects.filter(facility_id__in=Partner_Facility.objects.filter(
+                partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True)).values_list('facility_id', flat=True), access_level_id=1)
         if user.access_level.id == 3:
             return Users.objects.filter(access_level_id=1)
         if user.access_level.id == 4:

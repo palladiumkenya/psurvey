@@ -485,6 +485,17 @@ def new_questionnaire(request):
             'county': queryset,
         }
         return render(request, 'survey/new_questionnaire.html', context)
+    elif user.access_level.id == 5:
+        fac = Partner_Facility.objects.filter(
+            partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True))
+        facilities = Facility.objects.filter(id__in=fac.values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
+        queryset = Facility.objects.filter(id__in=fac.values_list('facility_id', flat=True)).distinct('county')
+        context = {
+            'u': u,
+            'fac': facilities,
+            'county': queryset,
+        }
+        return render(request, 'survey/new_questionnaire.html', context)
     elif user.access_level.id == 4:
         raise PermissionDenied
 
@@ -570,6 +581,28 @@ def edit_questionnaire(request, q_id):
             'fac_sel': s,
         }
         return render(request, 'survey/edit_questionnaire.html', context)
+    if user.access_level.id == 5:
+        fac = Partner_Facility.objects.filter(
+            partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True))
+        selected = Facility_Questionnaire.objects.filter(questionnaire_id=q_id)
+        try:
+            question = Questionnaire.objects.get(id=q_id)
+        except Questionnaire.DoesNotExist:
+            raise Http404('Questionnaire Does not exist')
+
+        if question.created_by.access_level.id == 3:
+            raise PermissionDenied
+        facilities = Facility.objects.filter(id__in=fac.values_list('facility_id', flat=True)
+                                             ).exclude(id__in=selected.values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
+        s = Facility.objects.all().filter(id__in=selected.values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
+
+        context = {
+            'u': u,
+            'fac': facilities,
+            'q': question,
+            'fac_sel': s,
+        }
+        return render(request, 'survey/edit_questionnaire.html', context)
     if user.access_level.id == 4:
         raise PermissionDenied
 
@@ -624,6 +657,30 @@ def questionnaire(request):
             return render(request, 'survey/questionnaires.html', context)
 
         elif user.access_level.id == 2:
+            fac = Partner_Facility.objects.filter(
+                partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True))
+            q = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('facility_id', flat=True)
+                                                      ).values_list('questionnaire_id').distinct()
+            quest = Questionnaire.objects.filter(id__in=q, created_at__gte=start, created_at__lte=end).order_by('-created_at')
+            count = quest.count()
+
+            page = request.GET.get('page', 1)
+            paginator = Paginator(quest, 20)
+            try:
+                quest = paginator.page(page)
+            except PageNotAnInteger:
+                quest = paginator.page(1)
+            except EmptyPage:
+                quest = paginator.page(paginator.num_pages)
+
+            context = {
+                'u': u,
+                'quest': quest,
+                'fac': fac,
+                'count': count,
+            }
+            return render(request, 'survey/questionnaires.html', context)
+        elif user.access_level.id == 5:
             fac = Partner_Facility.objects.filter(
                 partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True))
             q = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('facility_id', flat=True)
@@ -776,6 +833,9 @@ def add_question(request, q_id):
     if user.access_level.id == 2 and user.access_level.id != Questionnaire.objects.get(
             id=q_id).created_by.access_level.id:
         raise PermissionDenied
+    if user.access_level.id == 5 and user.access_level.id != Questionnaire.objects.get(
+            id=q_id).created_by.access_level.id:
+        raise PermissionDenied
     if user.access_level.id == 4:
         raise PermissionDenied
     try:
@@ -814,6 +874,9 @@ def edit_question(request, q_id):
     except Questionnaire.DoesNotExist:
         raise Http404('Questionnaire does not exist')
     if user.access_level.id == 2:
+        if Questionnaire.objects.get(id=q.questionnaire_id).created_by.access_level.id == 3:
+            raise PermissionDenied
+    if user.access_level.id == 5:
         if Questionnaire.objects.get(id=q.questionnaire_id).created_by.access_level.id == 3:
             raise PermissionDenied
     if user.access_level.id == 4:
@@ -866,6 +929,20 @@ def question_list(request, q_id):
         print(quest)
         return render(request, 'survey/question_list.html', context)
     elif user.access_level.id == 2:
+        try:
+            quest = Question.objects.filter(questionnaire=Questionnaire.objects.get(id=q_id)).order_by('question_order')
+        except Questionnaire.DoesNotExist:
+            raise Http404("Questionnaire Does not exist")
+        if Questionnaire.objects.get(id=q_id).created_by.access_level.id == 3:
+            raise PermissionDenied
+
+        context = {
+            'u': u,
+            'quest': quest,
+            'questionnaire': q_id,
+        }
+        return render(request, 'survey/question_list.html', context)
+    elif user.access_level.id == 5:
         try:
             quest = Question.objects.filter(questionnaire=Questionnaire.objects.get(id=q_id)).order_by('question_order')
         except Questionnaire.DoesNotExist:
