@@ -330,6 +330,7 @@ def index(request):
         }
         return render(request, 'survey/dashboard.html', context)
 
+
 def resp_chart(request):
     start = request.POST.get('start_date')
     end = request.POST.get('end_date')
@@ -689,6 +690,30 @@ def questionnaire(request):
             }
             return render(request, 'survey/questionnaires.html', context)
         elif user.access_level.id == 2:
+            fac = Partner_Facility.objects.filter(
+                partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True))
+            q = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('facility_id', flat=True)
+                                                      ).values_list('questionnaire_id').distinct()
+            quest = Questionnaire.objects.filter(id__in=q).order_by('-created_at')
+            count = quest.count()
+
+            page = request.GET.get('page', 1)
+            paginator = Paginator(quest, 20)
+            try:
+                quest = paginator.page(page)
+            except PageNotAnInteger:
+                quest = paginator.page(1)
+            except EmptyPage:
+                quest = paginator.page(paginator.num_pages)
+
+            context = {
+                'u': u,
+                'quest': quest,
+                'fac': fac,
+                'count': count,
+            }
+            return render(request, 'survey/questionnaires.html', context)
+        elif user.access_level.id == 5:
             fac = Partner_Facility.objects.filter(
                 partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True))
             q = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('facility_id', flat=True)
