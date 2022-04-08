@@ -163,6 +163,8 @@
                                                                     <a class="dropdown-item"
                                                                        href="{% url 'questions' q_id=foo.id %}">Edit
                                                                         Questions</a>
+                                                                    <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
+                                                                        Questionnaire Response Summary</a>
                                                                 {% elif foo.created_by.access_level.id != u.access_level.id %}
                                                                     <a class="dropdown-item disabled"
                                                                        href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
@@ -170,6 +172,8 @@
                                                                     <a class="dropdown-item disabled"
                                                                        href="{% url 'questions' q_id=foo.id %}">Edit
                                                                         Questions</a>
+                                                                    <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
+                                                                        Questionnaire Response Summary</a>
                                                                 {% else %}
                                                                     <a class="dropdown-item"
                                                                        href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
@@ -177,6 +181,8 @@
                                                                     <a class="dropdown-item"
                                                                        href="{% url 'questions' q_id=foo.id %}">Edit
                                                                         Questions</a>
+                                                                    <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
+                                                                        Questionnaire Response Summary</a>
                                                                 {% endif %}
 
                                                             </div>
@@ -200,6 +206,8 @@
                                                                 <a class="dropdown-item disabled"
                                                                    href="{% url 'questions' q_id=foo.id %}">Edit
                                                                     Questions</a>
+                                                                <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
+                                                                        Questionnaire Response Summary</a>
                                                             {% elif foo.created_by.access_level.id == 2 %}
                                                                 <a class="dropdown-item"
                                                                    href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
@@ -207,6 +215,8 @@
                                                                 <a class="dropdown-item"
                                                                    href="{% url 'questions' q_id=foo.id %}">Edit
                                                                     Questions</a>
+                                                        <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
+                                                                        Questionnaire Response Summary</a>
                                                             {% elif foo.created_by.access_level.id != u.access_level.id %}
                                                                 <a class="dropdown-item disabled"
                                                                    href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
@@ -214,6 +224,8 @@
                                                                 <a class="dropdown-item disabled"
                                                                    href="{% url 'questions' q_id=foo.id %}">Edit
                                                                     Questions</a>
+                                                        <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
+                                                                        Questionnaire Response Summary</a>
                                                             {% else %}
                                                                 <a class="dropdown-item"
                                                                    href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
@@ -221,6 +233,8 @@
                                                                 <a class="dropdown-item"
                                                                    href="{% url 'questions' q_id=foo.id %}">Edit
                                                                     Questions</a>
+                                                        <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
+                                                                        Questionnaire Response Summary</a>
                                                             {% endif %}
 
                                                         </div>
@@ -301,6 +315,8 @@
                                                         <a class="dropdown-item disabled"
                                                            href="{% url 'questions' q_id=foo.id %}">Edit
                                                             Questions</a>
+                                                        <a class="dropdown-item " href="{% url 'q_response_report' q_id=foo.id %}">
+                                                                        Questionnaire Response Summary</a>
                                                     {% elif foo.created_by.access_level.id == 2 %}
                                                         <a class="dropdown-item"
                                                            href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
@@ -308,6 +324,8 @@
                                                         <a class="dropdown-item"
                                                            href="{% url 'questions' q_id=foo.id %}">Edit
                                                             Questions</a>
+                                                        <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
+                                                                        Questionnaire Response Summary</a>
                                                     {% elif foo.created_by.access_level.id != u.access_level.id %}
                                                         <a class="dropdown-item disabled"
                                                            href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
@@ -315,6 +333,8 @@
                                                         <a class="dropdown-item disabled"
                                                            href="{% url 'questions' q_id=foo.id %}">Edit
                                                             Questions</a>
+                                                        <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
+                                                                        Questionnaire Response Summary</a>
                                                     {% else %}
                                                         <a class="dropdown-item"
                                                            href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
@@ -322,6 +342,8 @@
                                                         <a class="dropdown-item"
                                                            href="{% url 'questions' q_id=foo.id %}">Edit
                                                             Questions</a>
+                                                        <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
+                                                                        Questionnaire Response Summary</a>
                                                     {% endif %}
 
                                                 </div>

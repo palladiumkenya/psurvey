@@ -46,6 +46,40 @@ def index (request, q_id):
     return render(request, 'reports/response_report.html', context)
 
 
+@login_required
+def questionnaire_report (request, q_id):
+    user =  request.user
+    question = Questionnaire.objects.get(id=q_id)
+    respo = Response.objects.filter(question__questionnaire_id=q_id).order_by('-id')
+    page = request.GET.get('page', 1)
+    paginator = Paginator(respo, 20)
+    try:
+        resp = paginator.page(page)
+    except PageNotAnInteger:
+        resp = paginator.page(1)
+    except EmptyPage:
+        resp = paginator.page(paginator.num_pages)
+
+    labels = []
+    data = []
+
+    queryset = Response.objects.filter(question__questionnaire_id=q_id).values('answer__option').annotate(count=Count('answer'))
+
+    for city in queryset:
+        labels.append(city['answer__option'])
+        data.append(city['count'])
+
+    context = {
+        'u': user,
+        'items': paginator.count,
+        'quest': question,
+        'resp': resp,
+        'labels': labels,
+        'data': data,
+    }
+    return render(request, 'reports/questionnaire_report.html', context)
+
+
 def open_end (request, q_id):
     keywords = request.POST.get('keywords')
     print(keywords)
@@ -156,6 +190,25 @@ class RespViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         nome = self.kwargs['question_id']
         return Response.objects.filter(question_id=nome).order_by('-id')
+
+    def filter_queryset(self, qs):
+        search = self.request.GET.get('search[value]', None)
+        if search:
+            for q in qs:
+                if q.question.question_type == 1:
+                    return qs.filter(open_text__icontains=search)
+                else:
+                    return qs.filter(answer__option__icontains=search)
+
+        return qs
+
+
+class QuestionnaireViewSet(viewsets.ModelViewSet):
+    serializer_class = QuestionnaireRespSerializer
+
+    def get_queryset(self):
+        name = self.kwargs['questionnaire_id']
+        return Response.objects.filter(question__questionnaire_id=name).order_by('-id')
 
     def filter_queryset(self, qs):
         search = self.request.GET.get('search[value]', None)

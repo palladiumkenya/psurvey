@@ -1,0 +1,259 @@
+{% extends 'survey/base.html' %}
+{% block title %}
+    Response report
+{% endblock %}
+{% block breadcrumb %}
+    <h4 class="h4 text-white d-inline-block mb-0">Reports</h4>
+    <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+        <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i></a></li>
+            <li class="breadcrumb-item"><a href="{% url 'questionnaires' %}"><small>Questionnaires</small></a></li>
+            
+            <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><small>Response Report</small></a></li>
+            <li class="breadcrumb-item active" aria-current="page"><small>Response Report</small></li>
+        </ol>
+    </nav>
+{% endblock %}
+{% block body %}
+
+    <h3 class="h3">Total Responses</h3>
+    <div class="card card-stats">
+        <!-- Card body -->
+        <div class="card-body">
+            <div class="row">
+                <div class="col">
+                    <h5 class="card-title text-uppercase text-muted mb-0">Total Responses</h5>
+                    <span class="h2 font-weight-bold mb-0">{{ aq.count }}</span>
+                    <div class="counter h2 font-weight-bold mb-0" data-target="{{ items }}">0</div>
+                </div>
+                <div class="col-auto">
+                    <div class="icon icon-shape bg-gradient-green text-white rounded-circle shadow">
+                        <i class="ni ni-atom"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    <!-- Page content -->
+    <div class="container-fluid mt--6">
+    <div class="row">
+        <div class="col-xl-12">
+            <div class="card">
+                <div class="card-header bg-transparent">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h6 class="text-uppercase text-muted ls-1 mb-1">Performance</h6>
+                            <h5 class="h3 mb-0">Total responses for questionnaire</h5>
+                            <p class="text-center">Questionnaire Title: {{ quest.name }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4">
+                    <h3 class="text-center">Responses List</h3>
+                    <div class="table-responsive">
+                        <!-- Projects table -->
+                        <table id="albums" class="table table-striped table-bordered" style="width:100%"
+                               data-server-side="true" data-ajax="/api/questionnaire/{{ quest.id }}/?format=datatables">
+                            <thead class="thead-light">
+                            <tr>
+                                <th data-data="question.question">Question</th>
+                                {% if quest.question_type == 1 %}
+                                    <th data-data="open_text">Answer</th>
+                                {% else %}
+                                    <th data-data="answer.option" data-name="answer.option">Answer</th>
+                                {% endif %}
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock %}
+{% block scripts %}
+    <script src="//code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="//cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script src="//cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#albums').DataTable();
+        });
+        $.fn.dataTable.ext.errMode = 'throw';
+    </script>
+    <script>
+        const counters = document.querySelectorAll('.counter');
+        const speed = 200; // The lower the slower
+
+        counters.forEach(counter => {
+            const updateCount = () => {
+                const target = +counter.getAttribute('data-target');
+                const count = +counter.innerText;
+
+                const inc = target / speed;
+
+                if (count < target) {
+                    // Add inc to count and output in counter
+                    counter.innerText = Math.ceil(count + inc);
+                    // Call function every ms
+                    setTimeout(updateCount, 1);
+                } else {
+                    counter.innerText = target;
+                }
+            };
+
+            updateCount();
+        });
+
+    </script>
+    <script>
+
+        var config = {
+            type: 'pie',
+            data: {
+                datasets: [{
+                    data: {{ data|safe }},
+                    backgroundColor: [
+                        '#003f5c', '#ffa600', '#d45087', '#665191', '#a05195', '#f95d6a', '#2f4b7c', '#ff7c43'
+                    ],
+                    label: 'Population'
+                }],
+                labels: {{ labels|safe }}
+            },
+            options: {
+                legend: {
+                    display: true,
+                    position: 'right',
+                    labels: {
+                        fontColor: "#000080",
+                    }
+                },
+                responsive: true
+            }
+        };
+        $("#line").click(function () {
+            change('line');
+        });
+
+        $("#pie").click(function () {
+            change('pie');
+        });
+
+        $("#bar").click(function () {
+            change('bar');
+        });
+
+        window.onload = function () {
+            change('pie');
+            {#var ctx = document.getElementById('pie-chart').getContext('2d');#}
+            {#window.myPie = new Chart(ctx, config);#}
+        };
+        var myChart;
+
+        function change(newType) {
+            var ctx = document.getElementById("pie-chart").getContext("2d");
+
+            // Remove the old chart and all its event handles
+            if (myChart) {
+                myChart.destroy();
+            }
+
+            // Chart.js modifies the object you pass in. Pass a copy of the object so we can use the original object later
+            var temp = jQuery.extend(true, {}, config);
+            temp.type = newType;
+            myChart = new Chart(ctx, temp);
+        };
+
+    </script>
+    <script>
+        qForm = $('#keyForm')
+
+        function resetCanvas() {
+            $('#pie-chart').remove(); // this is my <canvas> element
+            div = document.querySelector("#container");
+            div.insertAdjacentHTML("afterbegin", '<canvas id=\x22pie-chart\x22 ></canvas>');
+
+            canvas = document.querySelector('#pie-chart');
+
+        }
+
+        qForm.submit(function (e) {
+
+            e.preventDefault();
+            var thisForm = $(this);
+            var endPoint = thisForm.attr("action") || window.location.href;
+            var method = thisForm.attr("method");
+            var formData = thisForm.serialize();
+
+
+            Swal.fire({
+                title: "Please wait!",
+                imageUrl: "/static/survey/img/Infinity-loader.gif",
+                showConfirmButton: false,
+                allowOutsideClick: false
+            });
+            $.ajax({
+                type: method,
+                url: endPoint,
+                data: formData,
+                success: function (data) {
+                    if (data == "error") {
+                        console.log(qForm[0])
+                        Swal.fire({
+                            title: 'Enter all Data Entry!!',
+                            text: 'ID already exisits',
+                            icon: 'error'
+                        });
+                    } else {
+                        resetCanvas();
+                        console.log(qForm[0])
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Loaded',
+                            icon: 'success'
+                        });
+                        var config = {
+                            type: 'pie',
+                            data: {
+                                datasets: [{
+                                    data: data.data,
+                                    backgroundColor: [
+                                        '#003f5c', '#ffa600', '#d45087', '#665191', '#a05195', '#f95d6a', '#2f4b7c', '#ff7c43'
+                                    ],
+                                    label: 'Population'
+                                }],
+                                labels: data.labels
+                            },
+                            options: {
+                                legend: {
+                                    display: true,
+                                    position: 'right',
+                                    labels: {
+                                        fontColor: "#000080",
+                                    }
+                                },
+                                responsive: true
+                            }
+                        };
+
+                        var ctx = document.getElementById('pie-chart').getContext('2d');
+                        window.myPie = new Chart(ctx, config);
+                    }
+                },
+                error: function (er) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: 'Cannot be Loaded',
+                        icon: 'error'
+                    });
+                }
+            });
+        });
+    </script>
+{% endblock %}
