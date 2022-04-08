@@ -1,15 +1,15 @@
 {% extends 'survey/base.html' %}
 {% block title %}
-    Partner-Facilities list
+    Organization-Facilities list
 {% endblock %}
 {% block breadcrumb %}
 
-    <h6 class="h5 text-white d-inline-block mb-0">Partner-Facilities list</h6>
+    <h6 class="h5 text-white d-inline-block mb-0">Organization-Facilities list</h6>
     <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
         <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
             <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="."><small>Partner-Facilities list</small></a></li>
-            <li class="breadcrumb-item active" aria-current="page"><small>Partner-Facilities list</small></li>
+            <li class="breadcrumb-item"><a href="."><small>Organization-Facilities list</small></a></li>
+            <li class="breadcrumb-item active" aria-current="page"><small>Organization-Facilities list</small></li>
         </ol>
     </nav>
 {% endblock %}
@@ -27,9 +27,9 @@
                 <div class="card-header border-0">
                     <div class="row align-items-center py-4">
 
-                        <h3 class="mb-0">Partner Facility List</h3>
+                        <h3 class="mb-0">Organization Facility List</h3>
                         <div class="col-lg-6 col-5 text-right">
-                            <a href="{% url 'register-partner' %}" class="btn btn-sm btn-neutral">New partner facility
+                            <a href="{% url 'register-partner' %}" class="btn btn-sm btn-neutral">New Organization facility
                                 link</a>
                             <button class="btn btn-sm btn-neutral" data-toggle="modal" data-target="#exampleModal">
                                 Filters
@@ -43,7 +43,7 @@
                     <table class="table align-items-center table-flush table-dark">
                         <thead class="thead-dark">
                         <tr>
-                            <th scope="col">Partner</th>
+                            <th scope="col">Organization</th>
                             <th scope="col">Created by</th>
                             <th scope="col">Access Level</th>
                             <th scope="col">Created at</th>
@@ -65,7 +65,7 @@
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                             <a class="dropdown-item" href="{% url 'edit-partner' p_id=foo.id %}">Edit
-                                                Partner</a>
+                                                Organization</a>
                                         </div>
                                     </div>
                                 </td>

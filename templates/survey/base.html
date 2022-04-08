@@ -22,6 +22,7 @@
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <!-- Argon CSS -->
     <link rel="stylesheet" href="{% static 'authApp/css/argon.css' %}" type="text/css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.2.2/css/buttons.dataTables.min.css" type="text/css">
     {% block headscript %}
 
     {% endblock %}
@@ -125,7 +126,7 @@
                             {% if u.access_level_id == 3 %}
                                 <a class="nav-link " href="{% url 'facility-partner-list' %}  ">
                                     <i class="ni ni-compass-04 text-black-50"></i>
-                                    <span class="nav-link-text">Facility Partner Link</span>
+                                    <span class="nav-link-text">Facility Organization Link</span>
                                 </a>
                                 <a class="nav-link " href="{% url 'designation-list' %}  ">
                                     <i class="ni ni-archive-2 text-black-50"></i>
@@ -135,7 +136,7 @@
                             {% if u.access_level_id == 2 %}
                                 <a class="nav-link " href="{% url 'register-partner-user' %}  ">
                                     <i class="ni ni-badge text-black-50"></i>
-                                    <span class="nav-link-text">Partner Users</span>
+                                    <span class="nav-link-text">Organization Users</span>
                                 </a>
                                 <a class="nav-link " href="{% url 'list-fac-admin' %}  ">
                                     <i class="ni ni-compass-04 text-black-50"></i>
