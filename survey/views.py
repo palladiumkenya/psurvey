@@ -189,7 +189,7 @@ def answer_question(request):
         questions = Question.objects.filter(questionnaire=quest)
 
         foo = q
-        a = next_ = None
+        previous = next_ = None
         l = len(questions)
         for index, obj in enumerate(questions):
             if obj == foo:
