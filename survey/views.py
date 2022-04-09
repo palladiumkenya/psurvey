@@ -934,13 +934,12 @@ def edit_question(request, q_id):
 
         q.question = question
         q.question_type = q_type
-        q.questionnaire_id=q_id
         q.question_order=question_order
 
         q.save()
 
         try:
-            dep_question = QuestionDependance.objects.get(question=q).delete()
+            dep_question = QuestionDependance.objects.filter(question=q).delete()
             if parent_question and parent_response:
                 dep_question = QuestionDependance.objects.create(question=q, answer_id=parent_response)
                 dep_question.save()
@@ -958,7 +957,7 @@ def edit_question(request, q_id):
         question_number.append(i)
     question_dependance = QuestionDependance.objects.filter(question_id=q_id)
     # question_order = Question.objects.filter(questionnaire_id=q_id).values_list('question_order', flat=True).order_by('question_order')
-    # questions = Question.objects.filter(questionnaire_id=q_id, question_type__in=[2, 3]).order_by('question_order')
+    questions = Question.objects.filter(questionnaire_id=quest_id, question_type__in=[2, 3]).order_by('question_order')
     
 
     context = {
@@ -966,9 +965,10 @@ def edit_question(request, q_id):
         'q': q,
         'questionnaire': quest_id,
         'question_order': question_number,
-        'question_dependance': question_dependance[0],
+        'question_dependance': question_dependance,
         'question_dependance_exists': question_dependance.exists(),
         'ans': a,
+        'questions': questions,
     }
     return render(request, 'survey/edit_questions.html', context)
 

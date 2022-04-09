@@ -124,7 +124,7 @@
                                     <div class="form-group">
                                         <label class="form-control-label " for="parent_question">Question </label>
                                         <select class="form-control" name="parent_question" id="parent_question">
-                                            <option value="" disabled hidden>Choose One...</option>
+                                            <option value="" disabled selected hidden>Choose One...</option>
                                             {% for i in questions %}
                                                 <option value="{{i.id}}">{{i.question_order}}. {{i.question}}</option>
                                             {% endfor %}
