@@ -883,7 +883,6 @@ def add_question(request, q_id):
     for i in range(1, questionnaire.number_of_questions + 1):
         question_number.append(i)
     question_order = Question.objects.filter(questionnaire_id=q_id).values_list('question_order', flat=True).order_by('question_order')
-    print(list(filterfalse(list(question_order).__contains__, question_number)))
     questions = Question.objects.filter(questionnaire_id=q_id, question_type__in=[2, 3]).order_by('question_order')
     
     context = {
@@ -941,11 +940,23 @@ def edit_question(request, q_id):
         except IntegrityError:
             transaction.savepoint_rollback(trans_one)
             return HttpResponse("error")
+    
+    question_number = []
+    questionnaire = Questionnaire.objects.get(id=quest_id)
+    for i in range(1, questionnaire.number_of_questions + 1):
+        question_number.append(i)
+    question_dependance = QuestionDependance.objects.filter(question_id=q_id)
+    # question_order = Question.objects.filter(questionnaire_id=q_id).values_list('question_order', flat=True).order_by('question_order')
+    # questions = Question.objects.filter(questionnaire_id=q_id, question_type__in=[2, 3]).order_by('question_order')
+    
 
     context = {
         'u': user,
         'q': q,
         'questionnaire': quest_id,
+        'question_order': question_number,
+        'question_dependance': question_dependance[0],
+        'question_dependance_exists': question_dependance.exists(),
         'ans': a,
     }
     return render(request, 'survey/edit_questions.html', context)
