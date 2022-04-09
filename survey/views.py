@@ -849,10 +849,11 @@ def add_question(request, q_id):
             answers = "Open Text"
         answers_list = answers.split(',')
         print(question, q_type, answers_list)
-
+        
+        trans_one = transaction.savepoint()
         q_save = Question.objects.create(question=question, question_type=q_type, created_by=user,
                                             questionnaire_id=q_id, question_order=question_order)
-        trans_one = transaction.savepoint()
+        
         question_id = q_save.pk
 
         if question_id:
@@ -920,6 +921,10 @@ def edit_question(request, q_id):
         question = request.POST.get('question')
         q_type = request.POST.get('q_type')  # For q_type 1 is opened ended 2 Radio 3 is Checkbox
         answers = request.POST.get('answers')
+        question_order = request.POST.get('question_order')
+        
+        parent_response = request.POST.get('parent_response')
+        parent_question = request.POST.get('parent_question')
         if q_type == '1':
             answers = "Open Text"
         answers_list = answers.split(',')
@@ -929,10 +934,16 @@ def edit_question(request, q_id):
 
         q.question = question
         q.question_type = q_type
+        q.questionnaire_id=q_id
+        q.question_order=question_order
 
         q.save()
 
         try:
+            dep_question = QuestionDependance.objects.get(question=q).delete()
+            if parent_question and parent_response:
+                dep_question = QuestionDependance.objects.create(question=q, answer_id=parent_response)
+                dep_question.save()
             Answer.objects.filter(question=q).delete()
             for f in answers_list:
                 fac_save = Answer.objects.create(question=q, created_by=user, option=f)
