@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
+    'django_cron',
 ]
 
 MIDDLEWARE = [
@@ -69,6 +70,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+# cronjobs
+CRON_CLASSES = [
+    "survey.cron.MyCronJob",
 ]
 
 ROOT_URLCONF = 'pSurvey.urls'
