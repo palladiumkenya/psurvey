@@ -159,11 +159,15 @@ def facility_partner_link(request):
             create_part = Partner.objects.create(name=partner, created_by=user)
             create_part.save()
             for i in fac:
-                p_user = Partner_Facility.objects.create(facility_id=i, created_by=user, partner_id=create_part.pk)
+                p_user = Partner_Facility.objects.create(facility_id=i, partner_id=create_part.pk)
                 p_user.save()
         except IntegrityError:
             transaction.savepoint_rollback(trans_one)
             return HttpResponse("error")
+        except Exception:
+            transaction.savepoint_rollback(trans_one)
+            return HttpResponse("error")
+            
 
     partner_users = Partner.objects.all()
     context = {
