@@ -1,5 +1,4 @@
 from datetime import datetime
-from urllib import response
 
 from django.db import models
 from authApp.models import Facility, Users
@@ -48,11 +47,19 @@ class QuestionDependance (models.Model):
     class Meta:
         db_table = "QuestionDependance"
 
+class Questionnaire_Participants (models.Model):
+    participant = models.CharField(max_length=100)
+    require_ccc_number = models.BooleanField(default=False)
+    is_active = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = "Questionnaire_Participants"
 
 class Started_Questionnaire (models.Model):
     ccc_number = models.CharField(max_length=15, null=True)
     firstname = models.CharField(max_length=300, null=True)
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
+    questionnaire_participant = models.ForeignKey(Questionnaire_Participants, on_delete=models.CASCADE)
     started_by = models.ForeignKey(Users, on_delete=models.CASCADE, default=1)
 
     class Meta:
@@ -72,6 +79,9 @@ class Response (models.Model):
 
 class Patient_Consent(models.Model):
     ccc_number = models.CharField(max_length=15)
+    informed_consent = models.BooleanField(default=True)
+    privacy_policy = models.BooleanField(default=True)
+    interviewer_statement = models.BooleanField(default=True)
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
 
     class Meta:
