@@ -38,7 +38,7 @@ def get_secret(setting, secrets=secrets):
 SECRET_KEY = 'b6&xe78vjs@fr3hjek^36e#01nrq*tgipu5q49s9p0n2-f0q5)'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
