@@ -18,7 +18,7 @@ jobs:
         script: |
           git config --global --add safe.directory /apps/github-workflows/mhealth-apps/psurvey    
           cd /apps/github-workflows/mhealth-apps/psurvey/
-          git pull origin cicd
+          git pull origin master
           git status
           cp  /apps/dockerApps/psurvey/python.dockerfile /apps/github-workflows/mhealth-apps/psurvey
           cp  /apps/dockerApps/psurvey/nginx.dockerfile /apps/github-workflows/mhealth-apps/psurvey
