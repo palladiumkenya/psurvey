@@ -10,7 +10,7 @@ services:
     restart: unless-stopped
     tty: true
     ports:
-      - 5433:5432
+      - 5490:5432
     environment:
       - POSTGRES_USER=psurvey
       - POSTGRES_PASSWORD=psurvey
