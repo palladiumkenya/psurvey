@@ -15,9 +15,10 @@ services:
       - POSTGRES_USER=psurvey
       - POSTGRES_PASSWORD=psurvey
       - POSTGRES_DB=psurvey
+    volumes:
+      - ../scripts/psurvey.sql:/docker-entrypoint-initdb.d/psurvey.sql
     networks:
       - psurvey
-
   pythonapp:
     build:
       context: .

@@ -1,4 +1,4 @@
-from itertools import filterfalse
+from itertools import filterfalse, islice
 import json
 from datetime import date
 
@@ -18,6 +18,9 @@ from rest_framework import status
 from rest_framework.response import Response as Res
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
+
+from survey.bulk_manager import BulkCreateManager
+
 
 from .models import *
 from .serializer import *
@@ -494,9 +497,20 @@ def new_questionnaire(request):
 
         if q_id:
             try:
+                batch_size = 500
+                objs = (Facility_Questionnaire(facility_id=f, questionnaire_id=q_id) for f in facility)
+                # while True:
+                #     batch = list(islice(objs, batch_size))
+                #     if not batch:
+                #         break
+                #     Facility_Questionnaire.objects.bulk_create(batch, batch_size)
+                bulk_mgr = BulkCreateManager(chunk_size=2000)
                 for f in facility:
-                    fac_save = Facility_Questionnaire.objects.create(facility_id=f, questionnaire_id=q_id)
-                    fac_save.save()
+                    bulk_mgr.add(Facility_Questionnaire(facility_id=f, questionnaire_id=q_id))
+                bulk_mgr.done()
+                # for f in facility:
+                #     fac_save = Facility_Questionnaire.objects.create(facility_id=f, questionnaire_id=q_id)
+                #     fac_save.save()
             except IntegrityError:
                 transaction.savepoint_rollback(trans_one)
                 return HttpResponse("error")
