@@ -589,9 +589,12 @@ def edit_questionnaire(request, q_id):
                     fac_rem = Facility_Questionnaire.objects.filter(facility_id=f, questionnaire_id=q_id)
                     fac_rem.delete()
 
+                bulk_mgr = BulkCreateManager(chunk_size=2000)
                 for f in facility:
-                    fac_save = Facility_Questionnaire.objects.create(facility_id=f, questionnaire_id=q_id)
-                    fac_save.save()
+                    bulk_mgr.add(Facility_Questionnaire(facility_id=f, questionnaire_id=q_id))
+                bulk_mgr.done()
+                    # fac_save = Facility_Questionnaire.objects.create(facility_id=f, questionnaire_id=q_id)
+                    # fac_save.save()
             except IntegrityError:
                 transaction.savepoint_rollback(trans_one)
                 return HttpResponse("error")
