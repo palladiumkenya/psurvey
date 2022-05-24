@@ -59,12 +59,10 @@
                                data-server-side="true" data-ajax="/api/questionnaire/{{ quest.id }}/?format=datatables">
                             <thead class="thead-light">
                             <tr>
+                                <th data-data="question.question_order">Question_No</th>
                                 <th data-data="question.question">Question</th>
-                                {% if quest.question_type == 1 %}
-                                    <th data-data="open_text">Answer</th>
-                                {% else %}
-                                    <th data-data="answer.option" data-name="answer.option">Answer</th>
-                                {% endif %}
+                                <th data-data="answer.option" data-name="answer.option">Answer</th>
+                                <th data-data="open_text">Description</th>
                             </tr>
                             </thead>
                         </table>
