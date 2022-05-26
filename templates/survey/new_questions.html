@@ -65,6 +65,8 @@
                                             <option value="1">Open Text</option>
                                             <option value="2">Single Select</option>
                                             <option value="3">Multiple Select</option>
+                                            <option value="4">Numeric</option>
+                                            <option value="5">Date</option>
                                         </select>
                                     </div>
                                 </div>
@@ -169,7 +171,7 @@
                 });
             });
             q_type.on('change', function () {
-                if ( this.value == '1'){
+                if ( this.value == '1' || this.value == '4' || this.value == '5'){
                     $("#shows").hide();
                     document.getElementById("answers").required = false;
                 } else {
@@ -178,7 +180,7 @@
                 }
             });
             prev_dep.on('change', function () {
-                if ( this.value == '1'){
+                if ( this.value == '1' || this.value == '4' || this.value == '5'){
                     $("#form2").show();
                     document.getElementById("parent_response").required = true;
                     document.getElementById("parent_question").required = true;

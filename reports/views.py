@@ -195,7 +195,7 @@ class RespViewSet(viewsets.ModelViewSet):
         search = self.request.GET.get('search[value]', None)
         if search:
             for q in qs:
-                if q.question.question_type == 1:
+                if q.question.question_type == 1 or q.question.question_type == 4 or q.question.question_type == 5:
                     return qs.filter(open_text__icontains=search)
                 else:
                     return qs.filter(answer__option__icontains=search)
@@ -214,7 +214,7 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
         search = self.request.GET.get('search[value]', None)
         if search:
             for q in qs:
-                if q.question.question_type == 1:
+                if q.question.question_type == 1 or q.question.question_type == 4 or q.question.question_type == 5:
                     return qs.filter(open_text__icontains=search)
                 else:
                     return qs.filter(answer__option__icontains=search)

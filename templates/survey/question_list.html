@@ -63,6 +63,10 @@
                                         Single Select
                                     {% elif foo.question_type == 3 %}
                                         Multiple Select
+                                    {% elif foo.question_type == 4 %}
+                                        Numeric
+                                    {% elif foo.question_type == 5 %}
+                                        Date
                                     {% endif %} </td>
                                 <td>{{ foo.created_by.f_name }}</td>
                                 <td>{{ foo.created_by.access_level.access_level }}</td>

@@ -864,6 +864,10 @@ def add_question(request, q_id):
         
         if q_type == '1':
             answers = "Open Text"
+        elif q_type == '4':
+            answers = "Numeric"
+        elif q_type == '5':
+            answers = "Date"
         answers_list = answers.split(',')
         print(question, q_type, answers_list)
         
@@ -944,6 +948,10 @@ def edit_question(request, q_id):
         parent_question = request.POST.get('parent_question')
         if q_type == '1':
             answers = "Open Text"
+        elif q_type == '4':
+            answers = "Numeric"
+        elif q_type == '5':
+            answers = "Date"
         answers_list = answers.split(',')
 
         print(question, q_type, answers_list)

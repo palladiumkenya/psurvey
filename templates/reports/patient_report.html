@@ -96,6 +96,10 @@
                             ty = "SINGLE SELECT"
                         else if (d.responses[i].data[x].question.question_type === 3)
                             ty = "MULTIPLE SELECT"
+                        else if (d.responses[i].data[x].question.question_type === 4)
+                            ty = "NUMERIC"
+                        else if (d.responses[i].data[x].question.question_type === 5)
+                            ty = "DATE"
                         a = a + '<tr>' +
                             '<td>' + d.responses[i].session + '</td>' +
                             '<td>' + d.responses[i].data[x].questionnaire.name + '</td>' +

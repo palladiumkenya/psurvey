@@ -66,15 +66,32 @@
                                                 <option value="1" selected>Open Text</option>
                                                 <option value="2">Single Select</option>
                                                 <option value="3">Multiple Select</option>
+                                                <option value="4">Numeric</option>
+                                                <option value="5">Date</option>
                                             {% elif q.question_type == 2 %}
                                                 <option value="1">Open Text</option>
                                                 <option value="2" selected>Single Select</option>
                                                 <option value="3">Multiple Select</option>
+                                                <option value="4">Numeric</option>
+                                                <option value="5">Date</option>
                                             {% elif q.question_type == 3 %}
                                                 <option value="1">Open Text</option>
                                                 <option value="2">Single Select</option>
                                                 <option value="3" selected>Multiple Select</option>
-
+                                                <option value="4">Numeric</option>
+                                                <option value="5">Date</option>
+                                            {% elif q.question_type == 4 %}
+                                                <option value="1">Open Text</option>
+                                                <option value="2">Single Select</option>
+                                                <option value="3">Multiple Select</option>
+                                                <option value="4" selected>Numeric</option>
+                                                <option value="5">Date</option>
+                                            {% elif q.question_type == 5 %}
+                                                <option value="1">Open Text</option>
+                                                <option value="2">Single Select</option>
+                                                <option value="3">Multiple Select</option>
+                                                <option value="4">Numeric</option>
+                                                <option value="5" selected>Date</option>
                                             {% endif %}
                                         </select>
                                     </div>
@@ -106,13 +123,13 @@
 
 
                                     <div class="form-group" id="shows"
-                                            {% if q.question_type == 1 %}
+                                            {% if q.question_type == 1 or q.question_type == 4 or q.question_type == 5 %}
                                                 style="display: none"
                                             {% endif %}>
                                         <label class="form-control-label" for="answers">Answer Options</label>
                                         <small class="text-blue text-right">Enter answers separated by commas</small>
                                         <input type="text" id="answers" name="answers" class="form-control"
-                                                {% if q.question_type != 1 %} value="{{ ans }}" {% endif %} placeholder="Answers">
+                                                {% if q.question_type == 2 or q.question_type == 3 %} value="{{ ans }}" {% endif %} placeholder="Answers">
                                     </div>
                                 </div>
                             </div>
@@ -185,14 +202,14 @@
             var q_type = $('#q_type');
             var prev_dep = $('#prev_dep');
             q_type.on('change', function () {
-                if (this.value == '1') {
+                if (this.value == '1' || this.value == '4' || this.value == '5') {
                     $("#shows").hide();
                 } else {
                     $("#shows").show();
                 }
             });
             prev_dep.on('change', function () {
-                if ( this.value == '1'){
+                if ( this.value == '1' || this.value == '4' || this.value == '5'){
                     $("#form2").show();
                     document.getElementById("parent_response").required = true;
                     document.getElementById("parent_question").required = true;
