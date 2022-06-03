@@ -855,9 +855,10 @@ def add_question(request, q_id):
     u = user
     if request.method == 'POST':
         question = request.POST.get('question')
-        q_type = request.POST.get('q_type')  # For q_type 1 is opened ended 2 Radio 3 is Checkbox
+        q_type = request.POST.get('q_type')  # For q_type 1 is opened ended 2 Radio 3 is Checkbox 4 is Numeric and 5 is Date
         answers = request.POST.get('answers')
         question_order = request.POST.get('question_order')
+        q_is_required = request.POST.get('q_is_required')
         
         parent_response = request.POST.get('parent_response')
         parent_question = request.POST.get('parent_question')
@@ -873,7 +874,7 @@ def add_question(request, q_id):
         
         trans_one = transaction.savepoint()
         q_save = Question.objects.create(question=question, question_type=q_type, created_by=user,
-                                            questionnaire_id=q_id, question_order=question_order)
+                                            questionnaire_id=q_id, question_order=question_order,is_required=q_is_required)
         
         question_id = q_save.pk
 
@@ -943,6 +944,7 @@ def edit_question(request, q_id):
         q_type = request.POST.get('q_type')  # For q_type 1 is opened ended 2 Radio 3 is Checkbox
         answers = request.POST.get('answers')
         question_order = request.POST.get('question_order')
+        q_is_required = request.POST.get('q_is_required')
         
         parent_response = request.POST.get('parent_response')
         parent_question = request.POST.get('parent_question')
@@ -960,6 +962,7 @@ def edit_question(request, q_id):
         q.question = question
         q.question_type = q_type
         q.question_order=question_order
+        q.is_required=q_is_required
 
         q.save()
 
