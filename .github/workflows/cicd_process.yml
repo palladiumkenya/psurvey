@@ -1,8 +1,7 @@
 name: deploy to test instance
 on:
   push:
-    branches:
-      -master
+    branches: [ master ]
 jobs:
 
   build:
