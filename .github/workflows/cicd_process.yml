@@ -24,6 +24,7 @@ jobs:
           cp  /apps/dockerApps/psurvey/python.dockerfile /apps/github-workflows/mhealth-apps/psurvey
           cp  /apps/dockerApps/psurvey/nginx.dockerfile /apps/github-workflows/mhealth-apps/psurvey
           cp  /apps/dockerApps/psurvey/secrets.json /apps/github-workflows/mhealth-apps/psurvey
+          cp  /apps/dockerApps/psurvey/pSurvey/settings.py /apps/github-workflows/mhealth-apps/psurvey
           cp -r /apps/dockerApps/psurvey/docker/ /apps/github-workflows/mhealth-apps/psurvey
           docker-compose down
           docker-compose rm -f
