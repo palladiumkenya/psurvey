@@ -19,7 +19,7 @@ django-templated-mail==1.1.1
 django-timezone-field==4.0
 djangorestframework==3.11.1
 djangorestframework-datatables==0.5.2
-djangorestframework-simplejwt==4.8.0
+djangorestframework-simplejwt>=4.0.0
 djoser==2.1.0
 docutils==0.16
 gitdb==4.0.9
