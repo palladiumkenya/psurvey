@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'survey',
     'errorPages',
     'reports',
+    'whitenoise.runserver_nostatic',
 
     'django.contrib.admin',
     'django.contrib.auth',
