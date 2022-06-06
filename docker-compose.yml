@@ -60,8 +60,9 @@ services:
         python manage.py makemigrations --merge
         sleep 10
         python manage.py migrate --noinput
+        python manage.py collectstatic --noinput
         sleep 10
-        python manage.py runserver 0.0.0.0:9100
+        python manage.py runserver 0.0.0.0:9100 --nostatic
 
   site: 
     build:
