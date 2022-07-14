@@ -12,6 +12,7 @@ class Questionnaire (models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     number_of_questions = models.IntegerField(default=1)
     active_till = models.DateField(default=datetime.now)
+    target_app = models.CharField(max_length=45)
 
     class Meta:
         db_table = "Questionnaires"

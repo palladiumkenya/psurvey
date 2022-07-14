@@ -485,13 +485,14 @@ def new_questionnaire(request):
         dateTill = request.POST.get('date-till')
         isActive = request.POST.get('isActive')
         num_questions = request.POST.get('num_questions')
+        target_app = request.POST.get('target_app')
 
         if isActive == "inactive":
             isActive = False
         else:
             isActive = True
         trans_one = transaction.savepoint()
-        create_quest = Questionnaire.objects.create(name=name, is_active=isActive, description=desc, active_till=dateTill, created_by=request.user, number_of_questions=num_questions)
+        create_quest = Questionnaire.objects.create(name=name, is_active=isActive, description=desc, active_till=dateTill, created_by=request.user, number_of_questions=num_questions, target_app=target_app)
         create_quest.save()
         q_id = create_quest.pk
 
@@ -561,6 +562,7 @@ def edit_questionnaire(request, q_id):
         dateTill = request.POST.get('date-till')
         isActive = request.POST.get('isActive')
         num_questions = request.POST.get('num_questions')
+        target_app = request.POST.get('target_app')
 
         if isActive == "inactive":
             isActive = False
@@ -575,6 +577,7 @@ def edit_questionnaire(request, q_id):
         create_quest.description = desc
         create_quest.active_till = dateTill
         create_quest.number_of_questions = num_questions
+        create_quest.target_app = target_app
 
         create_quest.save()
 

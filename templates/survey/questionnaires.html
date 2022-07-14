@@ -118,6 +118,7 @@
                                     <th scope="col">Created by</th>
                                     <th scope="col">Access Level</th>
                                     <th scope="col">Number of Questions</th>
+                                    <th scope="col">Target App</th>
                                     <th scope="col">Created at</th>
                                     <th scope="col"></th>
                                 </tr>
@@ -144,6 +145,7 @@
                                             <td>{{ foo.created_by.f_name }}</td>
                                             <td>{{ foo.created_by.access_level.access_level }}</td>
                                             <td>{{ foo.number_of_questions }}</td>
+                                            <td>{{ foo.target_app }}</td>
                                             <td>{{ foo.created_at }}</td>
                                             {% if u.access_level.id == 5 %}
                                                 {% if perms.survey.change_questionnaire %}
@@ -274,6 +276,7 @@
                                 <th scope="col">Created by</th>
                                 <th scope="col">Access Level</th>
                                 <th scope="col">Number of Questions</th>
+                                <th scope="col">Target App</th>
                                 <th scope="col">Created at</th>
                                 <th scope="col"></th>
                             </tr>
@@ -299,7 +302,8 @@
                                         <td>{{ foo.active_till }}</td>
                                         <td>{{ foo.created_by.f_name }}</td>
                                         <td>{{ foo.created_by.access_level.access_level }}</td>
-                                            <td>{{ foo.number_of_questions }}</td>
+                                        <td>{{ foo.number_of_questions }}</td>
+                                        <td>{{ foo.target_app }}</td>
                                         <td>{{ foo.created_at }}</td>
                                         <td class="text-right">
                                             <div class="dropdown">
