@@ -29,8 +29,8 @@ services:
       - .:/project    
     depends_on:
       - database
-    expose:
-      - 9100
+    ports:
+      - 9100:9100
     networks:
       - psurvey
       
