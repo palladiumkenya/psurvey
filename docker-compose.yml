@@ -64,16 +64,16 @@ services:
         sleep 10
         python manage.py runserver 0.0.0.0:9100 --nostatic
 
-  site: 
-    build:
-      context: .
-      dockerfile: nginx.dockerfile
-    container_name: psurveyapp-nginx
-    restart: unless-stopped
-    ports:
-      - "9100:443"
-    depends_on:
-      - pythonapp
-      - database
-    networks:
-      - psurvey         
+  #site: 
+   # build:
+    #  context: .
+     # dockerfile: nginx.dockerfile
+    #container_name: psurveyapp-nginx
+    #restart: unless-stopped
+    #ports:
+     # - "9100:443"
+    #depends_on:
+     # - pythonapp
+      #- database
+    #networks:
+     # - psurvey         
