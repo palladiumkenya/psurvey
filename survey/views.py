@@ -1003,6 +1003,36 @@ def edit_question(request, q_id):
     }
     return render(request, 'survey/edit_questions.html', context)
 
+@login_required
+def delete_question(request, q_id):
+    user = request.user
+    try:
+        q = Question.objects.get(id=q_id)
+        quest_id = Questionnaire.objects.get(id=q.questionnaire_id).id
+        ans = Answer.objects.filter(question=q).values_list('option', flat=True)
+        a = ','.join([str(elem) for elem in ans])
+        print(a)
+    except Question.DoesNotExist:
+        raise Http404('Question does not exist')
+    except Questionnaire.DoesNotExist:
+        raise Http404('Questionnaire does not exist')
+    if user.access_level.id == 2:
+        if Questionnaire.objects.get(id=q.questionnaire_id).created_by.access_level.id == 3:
+            raise PermissionDenied
+    if user.access_level.id == 5:
+        if Questionnaire.objects.get(id=q.questionnaire_id).created_by.access_level.id == 3:
+            raise PermissionDenied
+    if user.access_level.id == 4:
+        raise PermissionDenied
+    if request.method == 'POST':
+        q.delete()    
+
+    context = {
+        'u': user,
+        'q': q,
+        'questionnaire': quest_id,
+    }
+    return render(request, 'survey/question_list.html', context)
 
 @login_required
 def question_list(request, q_id):
