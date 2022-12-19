@@ -949,6 +949,7 @@ def edit_question(request, q_id):
         answers = request.POST.get('answers')
         question_order = request.POST.get('question_order')
         q_is_required = request.POST.get('q_is_required')
+        future_date = request.POST.get('date_future')
         
         parent_response = request.POST.get('parent_response')
         parent_question = request.POST.get('parent_question')
@@ -967,6 +968,7 @@ def edit_question(request, q_id):
         q.question_type = q_type
         q.question_order=question_order
         q.is_required=q_is_required
+        q.allow_furure_date=future_date
 
         q.save()
 
