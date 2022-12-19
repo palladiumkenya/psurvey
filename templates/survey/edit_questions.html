@@ -15,7 +15,7 @@
 {% endblock %}
 {% block breadcrumb %}
 
-    <h6 class="h6 text-white d-inline-block mb-0">New question</h6>
+    <h6 class="h6 text-white d-inline-block mb-0">Edit question</h6>
     <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
         <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
             <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i></a></li>
@@ -121,23 +121,7 @@
                                             {% endif %}
                                         </select>
                                     </div>
-                                </div>
-                                {% if q.question_type == 5%}
-                                <div class="col-lg-6" id="depend_date">
-                                    <div class="form-group">
-                                        <label class="form-control-label" for="date_future">Allow Future Date?</label>
-                                        <select class="form-control" name="date_future" id="date_future">
-                                            {% if q.allow_furure_date == 'true' %}
-                                            <option value="true" selected>Yes</option>
-                                            <option value="false">No</option>
-                                            {% elif q.allow_furure_date == 'false' %}
-                                            <option value="true">Yes</option>
-                                            <option value="false" selected>No</option>
-                                            {% endif %}
-                                        </select>
-                                    </div>
-                                </div>
-                                {% endif %}
+                                </div>                               
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label class="form-control-label" for="prev_dep">Dependent on Previous Response</label>
@@ -145,6 +129,17 @@
                                             <option value="" disabled  hidden>Choose One...</option>
                                             <option value="1" {% if question_dependance_exists %} selected {% endif %}>Yes</option>
                                             <option value="2" {% if not question_dependance_exists %} selected {% endif %}>No</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group" id="date_rules" {% if q.question_type != 5 %} style="display: none"{% endif %}>
+                                        <label class="form-control-label" for="date_validation">Date Validation</label>
+                                        <select class="form-control" name="date_validation" id="date_validation" required>
+                                            <option value="" disabled hidden>Choose One...</option>
+                                            <option value="none" {% if q.date_validation == 'none' %} selected {% endif %}>Open</option>
+                                            <option value="restrict_future" {% if q.date_validation == 'restrict_future' %} selected {% endif %}>Restrict Future Dates</option>
+                                            <option value="restrict_past" {% if q.date_validation == 'restrict_past' %} selected {% endif %}>Restrict Past Dates</option>
                                         </select>
                                     </div>
                                 </div>
@@ -239,12 +234,12 @@
                     $("#shows").show();
                 }
 
-                if (this.value == '5') {
-                    $("#depend_date").show();
-                    document.getElementById("date_future").required = true;
-                } else {
-                    $("#depend_date").hide();
-                    document.getElementById("date_future").required = false;
+                if (this.value == '5'){
+                    $("#date_rules").show();
+                    document.getElementById("date_validation").required = true;
+                } else{
+                    $("#date_rules").hide();
+                    document.getElementById("date_validation").required = false;
                 }
             });
             prev_dep.on('change', function () {
