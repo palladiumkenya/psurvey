@@ -877,7 +877,7 @@ def add_question(request, q_id):
         print(question, q_type, answers_list)
         
         trans_one = transaction.savepoint()
-        q_save = Question.objects.create(question=question, question_type=q_type, created_by=user, allow_furure_date=date_future,
+        q_save = Question.objects.create(question=question, question_type=q_type, created_by=user, allow_furure_date=future_date,
                                             questionnaire_id=q_id, question_order=question_order,is_required=q_is_required)
         
         question_id = q_save.pk
