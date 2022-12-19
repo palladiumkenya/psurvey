@@ -21,6 +21,7 @@ class Questionnaire (models.Model):
 class Question (models.Model):
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
     question =  models.CharField(max_length=500)
+    allow_furure_date =  models.CharField(max_length=10, default="false")
     question_type = models.IntegerField()
     question_order = models.IntegerField(default=1)
     is_required = models.BooleanField(default=False)

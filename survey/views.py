@@ -862,6 +862,7 @@ def add_question(request, q_id):
         answers = request.POST.get('answers')
         question_order = request.POST.get('question_order')
         q_is_required = request.POST.get('q_is_required')
+        future_date = request.POST.get('date_future')
         
         parent_response = request.POST.get('parent_response')
         parent_question = request.POST.get('parent_question')
@@ -876,7 +877,7 @@ def add_question(request, q_id):
         print(question, q_type, answers_list)
         
         trans_one = transaction.savepoint()
-        q_save = Question.objects.create(question=question, question_type=q_type, created_by=user,
+        q_save = Question.objects.create(question=question, question_type=q_type, created_by=user, allow_furure_date=date_future,
                                             questionnaire_id=q_id, question_order=question_order,is_required=q_is_required)
         
         question_id = q_save.pk

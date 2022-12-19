@@ -91,6 +91,16 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="col-lg-6" id="depend_date">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="date_future">Allow Future Date?</label>
+                                        <select class="form-control" name="date_future" id="date_future">
+                                            <option value="" disabled selected hidden>Choose One...</option>
+                                            <option value="true">Yes</option>
+                                            <option value="false">No</option>
+                                        </select>
+                                    </div>
+                                </div>
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label class="form-control-label" for="prev_dep">Dependent on Previous Response</label>
@@ -187,6 +197,14 @@
                 } else {
                     $("#shows").show();
                     document.getElementById("answers").required = true;
+                }
+
+                if (this.value == '5') {
+                    $("#depend_date").show();
+                    document.getElementById("date_future").required = true;
+                } else {
+                    $("#depend_date").hide();
+                    document.getElementById("date_future").required = false;
                 }
             });
             prev_dep.on('change', function () {
