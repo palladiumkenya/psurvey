@@ -133,6 +133,22 @@
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
+                                    <div class="form-group">
+                                        <label class="form-control-label" for="q_is_repeatable">Make this Question Repeatable?</label>
+                                        <select class="form-control" name="q_is_repeatable" id="q_is_repeatable" required>
+
+                                            {% if q.is_repeatable == True %}
+                                                <option value="True" selected>Yes</option>
+                                                <option value="False">No</option>
+                                            {% elif q.is_repeatable == False %}
+                                                <option value="True">Yes</option>
+                                                <option value="False" selected>No</option>
+                                            {% endif %}
+                                        
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
                                     <div class="form-group" id="date_rules" {% if q.question_type != 5 %} style="display: none"{% endif %}>
                                         <label class="form-control-label" for="date_validation">Date Validation</label>
                                         <select class="form-control" name="date_validation" id="date_validation" required>
@@ -227,6 +243,7 @@
             var qForm = $("#questForm");
             var q_type = $('#q_type');
             var prev_dep = $('#prev_dep');
+            var q_is_repeatable = $('#q_is_repeatable');
             q_type.on('change', function () {
                 if (this.value == '1' || this.value == '4' || this.value == '5') {
                     $("#shows").hide();
@@ -243,7 +260,7 @@
                 }
             });
             prev_dep.on('change', function () {
-                if ( this.value == '1' || this.value == '4' || this.value == '5'){
+                if ( this.value == '1' ){
                     $("#form2").show();
                     document.getElementById("parent_response").required = true;
                     document.getElementById("parent_question").required = true;
@@ -251,8 +268,20 @@
                     $("#form2").hide();
                     document.getElementById("parent_response").required = false;
                     document.getElementById("parent_question").required = false;
+                    q_is_repeatable.val("False").change();
                 }
             });
+            
+            q_is_repeatable.on('change', function () {
+                if ( this.value == 'True' ){
+                    prev_dep.val("1").change();
+                    
+                } else {
+                    prev_dep.val("2").change();
+                   
+                }
+            });
+
             qForm.submit(function (e) {
                 //if (CheckData())  {
                 e.preventDefault();
