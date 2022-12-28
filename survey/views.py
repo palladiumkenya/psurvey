@@ -1041,6 +1041,7 @@ def delete_question(request, q_id):
     if user.access_level.id == 4:
         raise PermissionDenied
     if request.method == 'POST':
+        Response.objects.filter(question=q).delete()
         QuestionDependance.objects.filter(question=q).delete()
         Answer.objects.filter(question=q).delete()
         Question.objects.filter(question=q).delete()    
