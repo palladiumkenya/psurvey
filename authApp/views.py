@@ -18,6 +18,8 @@ from rest_framework.response import Response as Res
 from rest_framework.views import APIView
 from datetime import date
 
+from survey.bulk_manager import BulkCreateManager
+
 from .forms import LoginForm
 from .serializer import *
 from .models import *
@@ -158,9 +160,14 @@ def facility_partner_link(request):
         try:
             create_part = Partner.objects.create(name=partner, created_by=user)
             create_part.save()
+            
+            bulk_mgr = BulkCreateManager(chunk_size=2000)
             for i in fac:
-                p_user = Partner_Facility.objects.create(facility_id=i, partner_id=create_part.pk)
-                p_user.save()
+                bulk_mgr.add(Partner_Facility(facility_id=i, partner_id=create_part.pk))
+            bulk_mgr.done()
+            # for i in fac:
+            #     p_user = Partner_Facility.objects.create(facility_id=i, partner_id=create_part.pk)
+            #     p_user.save()
         except IntegrityError:
             transaction.savepoint_rollback(trans_one)
             return HttpResponse("error")
