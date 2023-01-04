@@ -1,7 +1,7 @@
 name: deploy to test instance
 on:
   push:
-    branches: [ master ]
+    branches: [ cicd ]
 jobs:
 
   build:
@@ -21,6 +21,7 @@ jobs:
           sudo mkdir psurvey
           sudo chown -R cicd2:cicd2 psurvey
           git config --global --add safe.directory /apps/github-workflows/mhealth-apps/psurvey    
+
           cd psurvey/
           git clone -b master https://github.com/palladiumkenya/psurvey.git .
           git status
@@ -32,5 +33,4 @@ jobs:
           docker-compose stop pythonapp
           docker-compose rm -f pythonapp
           docker-compose up -d --build pythonapp
-          
-          
+
