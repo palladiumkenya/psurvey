@@ -115,10 +115,8 @@
                                     <th>Name</th>
                                     <th scope="col">Status</th>
                                     <th scope="col">Active till</th>
-                                    <th scope="col">Created by</th>
-                                    <th scope="col">Access Level</th>
                                     <th scope="col">Number of Questions</th>
-                                    <th scope="col">Created at</th>
+                                    <th scope="col">Target App</th>
                                     <th scope="col"></th>
                                 </tr>
                                 </thead>
@@ -141,10 +139,8 @@
                                             {% endif %}
                                             </td>
                                             <td>{{ foo.active_till }}</td>
-                                            <td>{{ foo.created_by.f_name }}</td>
-                                            <td>{{ foo.created_by.access_level.access_level }}</td>
                                             <td>{{ foo.number_of_questions }}</td>
-                                            <td>{{ foo.created_at }}</td>
+                                            <td>{{ foo.target_app }}</td>
                                             {% if u.access_level.id == 5 %}
                                                 {% if perms.survey.change_questionnaire %}
                                                     <td class="text-right">
@@ -268,20 +264,65 @@
                         <table class="table align-items-center table-flush fold-table">
                             <thead class="thead-light">
                             <tr>
-                                <th>Name</th>
+                                <th scope="col"></th>
+                                <th >Name</th>
                                 <th scope="col">Status</th>
                                 <th scope="col">Active till</th>
-                                <th scope="col">Created by</th>
-                                <th scope="col">Access Level</th>
                                 <th scope="col">Number of Questions</th>
-                                <th scope="col">Created at</th>
-                                <th scope="col"></th>
+                                <th scope="col">Target App</th>
                             </tr>
                             </thead>
                             <tbody class="list">
                             {% if count > 0 %}
                                 {% for foo in quest %}
-                                    <tr class="view">
+                                    <tr class="view"><td class="text-right">
+                                        <div class="dropdown">
+                                            <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
+                                               data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                                                {% if u.access_level.id == 4 %}
+                                                    <a class="dropdown-item disabled"
+                                                       href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                        Questionnaire</a>
+                                                    <a class="dropdown-item disabled"
+                                                       href="{% url 'questions' q_id=foo.id %}">Edit
+                                                        Questions</a>
+                                                    <a class="dropdown-item " href="{% url 'q_response_report' q_id=foo.id %}">
+                                                                    Questionnaire Response Summary</a>
+                                                {% elif foo.created_by.access_level.id == 2 %}
+                                                    <a class="dropdown-item"
+                                                       href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                        Questionnaire</a>
+                                                    <a class="dropdown-item"
+                                                       href="{% url 'questions' q_id=foo.id %}">Edit
+                                                        Questions</a>
+                                                    <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
+                                                                    Questionnaire Response Summary</a>
+                                                {% elif foo.created_by.access_level.id != u.access_level.id %}
+                                                    <a class="dropdown-item disabled"
+                                                       href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                        Questionnaire</a>
+                                                    <a class="dropdown-item disabled"
+                                                       href="{% url 'questions' q_id=foo.id %}">Edit
+                                                        Questions</a>
+                                                    <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
+                                                                    Questionnaire Response Summary</a>
+                                                {% else %}
+                                                    <a class="dropdown-item"
+                                                       href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
+                                                        Questionnaire</a>
+                                                    <a class="dropdown-item"
+                                                       href="{% url 'questions' q_id=foo.id %}">Edit
+                                                        Questions</a>
+                                                    <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
+                                                                    Questionnaire Response Summary</a>
+                                                {% endif %}
+
+                                            </div>
+                                        </div>
+                                    </td>
                                         <td>{{ foo.name }}</td>
                                         <td>{% if foo.is_active %}
                                             <span class="badge badge-dot mr-4">
@@ -297,58 +338,9 @@
                                         {% endif %}
                                         </td>
                                         <td>{{ foo.active_till }}</td>
-                                        <td>{{ foo.created_by.f_name }}</td>
-                                        <td>{{ foo.created_by.access_level.access_level }}</td>
-                                            <td>{{ foo.number_of_questions }}</td>
-                                        <td>{{ foo.created_at }}</td>
-                                        <td class="text-right">
-                                            <div class="dropdown">
-                                                <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
-                                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                    <i class="fas fa-ellipsis-v"></i>
-                                                </a>
-                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
-                                                    {% if u.access_level.id == 4 %}
-                                                        <a class="dropdown-item disabled"
-                                                           href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
-                                                            Questionnaire</a>
-                                                        <a class="dropdown-item disabled"
-                                                           href="{% url 'questions' q_id=foo.id %}">Edit
-                                                            Questions</a>
-                                                        <a class="dropdown-item " href="{% url 'q_response_report' q_id=foo.id %}">
-                                                                        Questionnaire Response Summary</a>
-                                                    {% elif foo.created_by.access_level.id == 2 %}
-                                                        <a class="dropdown-item"
-                                                           href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
-                                                            Questionnaire</a>
-                                                        <a class="dropdown-item"
-                                                           href="{% url 'questions' q_id=foo.id %}">Edit
-                                                            Questions</a>
-                                                        <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
-                                                                        Questionnaire Response Summary</a>
-                                                    {% elif foo.created_by.access_level.id != u.access_level.id %}
-                                                        <a class="dropdown-item disabled"
-                                                           href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
-                                                            Questionnaire</a>
-                                                        <a class="dropdown-item disabled"
-                                                           href="{% url 'questions' q_id=foo.id %}">Edit
-                                                            Questions</a>
-                                                        <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
-                                                                        Questionnaire Response Summary</a>
-                                                    {% else %}
-                                                        <a class="dropdown-item"
-                                                           href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
-                                                            Questionnaire</a>
-                                                        <a class="dropdown-item"
-                                                           href="{% url 'questions' q_id=foo.id %}">Edit
-                                                            Questions</a>
-                                                        <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
-                                                                        Questionnaire Response Summary</a>
-                                                    {% endif %}
-
-                                                </div>
-                                            </div>
-                                        </td>
+                                        <td>{{ foo.number_of_questions }}</td>
+                                        <td>{{ foo.target_app }}</td>
+                                        
                                     </tr>
                                     <tr class="fold">
                                         <td colspan="7">

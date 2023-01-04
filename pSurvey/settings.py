@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'survey',
     'errorPages',
     'reports',
+    'whitenoise.runserver_nostatic',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -64,6 +65,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -106,7 +108,7 @@ WSGI_APPLICATION = 'pSurvey.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'pSurvey',
+        'NAME': 'psurvey',
         'USER': get_secret('USER'),
         'PASSWORD':  get_secret('PWD'),
         'HOST': get_secret('HOST'),  # Or an IP Address that your DB is hosted on

@@ -53,7 +53,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    {% if quest.question_type != 1 %}
+                    {% if quest.question_type == 2 or quest.question_type == 3 %}
                         <!-- Chart -->
                         <button class="btn btn-darker m-3" id='line'>line</button>
                         <button class="btn btn-darker m-3" id='bar'>bar</button>
@@ -95,7 +95,7 @@
                             <thead class="thead-light">
                             <tr>
                                 <th data-data="session">Session</th>
-                                {% if quest.question_type == 1 %}
+                                {% if quest.question_type == 1 or quest.question_type == 4 or quest.question_type == 5 %}
                                     <th data-data="open_text">Answer</th>
                                 {% else %}
                                     <th data-data="answer.option" data-name="answer.option">Answer</th>

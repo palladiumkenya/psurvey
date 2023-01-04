@@ -485,13 +485,14 @@ def new_questionnaire(request):
         dateTill = request.POST.get('date-till')
         isActive = request.POST.get('isActive')
         num_questions = request.POST.get('num_questions')
+        target_app = request.POST.get('target_app')
 
         if isActive == "inactive":
             isActive = False
         else:
             isActive = True
         trans_one = transaction.savepoint()
-        create_quest = Questionnaire.objects.create(name=name, is_active=isActive, description=desc, active_till=dateTill, created_by=request.user, number_of_questions=num_questions)
+        create_quest = Questionnaire.objects.create(name=name, is_active=isActive, description=desc, active_till=dateTill, created_by=request.user, number_of_questions=num_questions, target_app=target_app)
         create_quest.save()
         q_id = create_quest.pk
 
@@ -561,6 +562,7 @@ def edit_questionnaire(request, q_id):
         dateTill = request.POST.get('date-till')
         isActive = request.POST.get('isActive')
         num_questions = request.POST.get('num_questions')
+        target_app = request.POST.get('target_app')
 
         if isActive == "inactive":
             isActive = False
@@ -575,6 +577,7 @@ def edit_questionnaire(request, q_id):
         create_quest.description = desc
         create_quest.active_till = dateTill
         create_quest.number_of_questions = num_questions
+        create_quest.target_app = target_app
 
         create_quest.save()
 
@@ -855,21 +858,35 @@ def add_question(request, q_id):
     u = user
     if request.method == 'POST':
         question = request.POST.get('question')
-        q_type = request.POST.get('q_type')  # For q_type 1 is opened ended 2 Radio 3 is Checkbox
+        q_type = request.POST.get('q_type')  # For q_type 1 is opened ended 2 Radio 3 is Checkbox 4 is Numeric and 5 is Date
         answers = request.POST.get('answers')
         question_order = request.POST.get('question_order')
+        q_is_required = request.POST.get('q_is_required')
+        q_date_validation = request.POST.get('date_validation')
+        q_is_repeatable = request.POST.get('q_is_repeatable')
         
         parent_response = request.POST.get('parent_response')
         parent_question = request.POST.get('parent_question')
-        
+
+               
         if q_type == '1':
             answers = "Open Text"
+        elif q_type == '4':
+            answers = "Numeric"
+        elif q_type == '5':
+            answers = "Date"
+
+        if q_date_validation == '':
+            q_date_validation = None
+
         answers_list = answers.split(',')
         print(question, q_type, answers_list)
         
         trans_one = transaction.savepoint()
         q_save = Question.objects.create(question=question, question_type=q_type, created_by=user,
-                                            questionnaire_id=q_id, question_order=question_order)
+                                            questionnaire_id=q_id, question_order=question_order,is_required=q_is_required,
+                                            date_validation = q_date_validation,
+                                            is_repeatable = q_is_repeatable)
         
         question_id = q_save.pk
 
@@ -939,11 +956,21 @@ def edit_question(request, q_id):
         q_type = request.POST.get('q_type')  # For q_type 1 is opened ended 2 Radio 3 is Checkbox
         answers = request.POST.get('answers')
         question_order = request.POST.get('question_order')
+        q_is_required = request.POST.get('q_is_required')
+        q_date_validation = request.POST.get('date_validation')
+        q_is_repeatable = request.POST.get('q_is_repeatable')
+
+        if q_date_validation == '':
+            q_date_validation = None
         
         parent_response = request.POST.get('parent_response')
         parent_question = request.POST.get('parent_question')
         if q_type == '1':
             answers = "Open Text"
+        elif q_type == '4':
+            answers = "Numeric"
+        elif q_type == '5':
+            answers = "Date"
         answers_list = answers.split(',')
 
         print(question, q_type, answers_list)
@@ -951,7 +978,10 @@ def edit_question(request, q_id):
 
         q.question = question
         q.question_type = q_type
-        q.question_order=question_order
+        q.question_order = question_order
+        q.is_required = q_is_required
+        q.date_validation = q_date_validation
+        q.is_repeatable = q_is_repeatable
 
         q.save()
 
@@ -989,6 +1019,39 @@ def edit_question(request, q_id):
     }
     return render(request, 'survey/edit_questions.html', context)
 
+@login_required
+def delete_question(request, q_id):
+    user = request.user
+    try:
+        q = Question.objects.get(id=q_id)
+        quest_id = Questionnaire.objects.get(id=q.questionnaire_id).id
+        ans = Answer.objects.filter(question=q).values_list('option', flat=True)
+        a = ','.join([str(elem) for elem in ans])
+        print(a)
+    except Question.DoesNotExist:
+        raise Http404('Question does not exist')
+    except Questionnaire.DoesNotExist:
+        raise Http404('Questionnaire does not exist')
+    if user.access_level.id == 2:
+        if Questionnaire.objects.get(id=q.questionnaire_id).created_by.access_level.id == 3:
+            raise PermissionDenied
+    if user.access_level.id == 5:
+        if Questionnaire.objects.get(id=q.questionnaire_id).created_by.access_level.id == 3:
+            raise PermissionDenied
+    if user.access_level.id == 4:
+        raise PermissionDenied
+    if request.method == 'POST':
+        Response.objects.filter(question=q).delete()
+        QuestionDependance.objects.filter(question=q).delete()
+        Answer.objects.filter(question=q).delete()
+        Question.objects.filter(question=q).delete()    
+
+    context = {
+        'u': user,
+        'q': None,
+        'questionnaire': quest_id,
+    }
+    return render(request, 'survey/question_list.html', context)
 
 @login_required
 def question_list(request, q_id):

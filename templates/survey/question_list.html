@@ -45,9 +45,6 @@
                             <th scope="col">Question Order</th>
                             <th scope="col">Question</th>
                             <th scope="col">Question Type</th>
-                            <th scope="col">User</th>
-                            <th scope="col">Access Level</th>
-                            <th scope="col">Created at</th>
                             <th scope="col"></th>
                         </tr>
                         </thead>
@@ -63,10 +60,11 @@
                                         Single Select
                                     {% elif foo.question_type == 3 %}
                                         Multiple Select
+                                    {% elif foo.question_type == 4 %}
+                                        Numeric
+                                    {% elif foo.question_type == 5 %}
+                                        Date
                                     {% endif %} </td>
-                                <td>{{ foo.created_by.f_name }}</td>
-                                <td>{{ foo.created_by.access_level.access_level }}</td>
-                                <td>{{ foo.created_at }}</td>
                                 <td class="text-right">
                                     <div class="dropdown">
                                         <a class="btn btn-sm btn-icon-only text-light" href="#" role="button"
@@ -75,7 +73,9 @@
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
                                             <a class="dropdown-item" href="{% url 'edit-question' q_id=foo.id %}">Edit
-                                                Questions</a>
+                                                Question</a> 
+                                            <a class="dropdown-item" href="{% url 'delete-question' q_id=foo.id %}">Delete
+                                                    Question</a>
                                             <a class="dropdown-item" href="{% url 'response_report' q_id=foo.id %}">Response Report</a>
                                         </div>
                                     </div>
