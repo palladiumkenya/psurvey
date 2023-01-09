@@ -21,10 +21,11 @@ class Questionnaire (models.Model):
 class Question (models.Model):
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
     question =  models.CharField(max_length=500)
-    allow_furure_date =  models.CharField(max_length=10, default="false")
     question_type = models.IntegerField()
     question_order = models.IntegerField(default=1)
     is_required = models.BooleanField(default=False)
+    date_validation = models.CharField(max_length=20,default=None)
+    is_repeatable = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(Users, on_delete=models.CASCADE)
 

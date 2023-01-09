@@ -897,23 +897,31 @@ def add_question(request, q_id):
         answers = request.POST.get('answers')
         question_order = request.POST.get('question_order')
         q_is_required = request.POST.get('q_is_required')
-        future_date = request.POST.get('date_future')
+        q_date_validation = request.POST.get('date_validation')
+        q_is_repeatable = request.POST.get('q_is_repeatable')
         
         parent_response = request.POST.get('parent_response')
         parent_question = request.POST.get('parent_question')
-        
+
+               
         if q_type == '1':
             answers = "Open Text"
         elif q_type == '4':
             answers = "Numeric"
         elif q_type == '5':
             answers = "Date"
+
+        if q_date_validation == '':
+            q_date_validation = None
+
         answers_list = answers.split(',')
         print(question, q_type, answers_list)
         
         trans_one = transaction.savepoint()
-        q_save = Question.objects.create(question=question, question_type=q_type, created_by=user, allow_furure_date=future_date,
-                                            questionnaire_id=q_id, question_order=question_order,is_required=q_is_required)
+        q_save = Question.objects.create(question=question, question_type=q_type, created_by=user,
+                                            questionnaire_id=q_id, question_order=question_order,is_required=q_is_required,
+                                            date_validation = q_date_validation,
+                                            is_repeatable = q_is_repeatable)
         
         question_id = q_save.pk
 
@@ -984,7 +992,11 @@ def edit_question(request, q_id):
         answers = request.POST.get('answers')
         question_order = request.POST.get('question_order')
         q_is_required = request.POST.get('q_is_required')
-        future_date = request.POST.get('date_future')
+        q_date_validation = request.POST.get('date_validation')
+        q_is_repeatable = request.POST.get('q_is_repeatable')
+
+        if q_date_validation == '':
+            q_date_validation = None
         
         parent_response = request.POST.get('parent_response')
         parent_question = request.POST.get('parent_question')
@@ -1001,9 +1013,10 @@ def edit_question(request, q_id):
 
         q.question = question
         q.question_type = q_type
-        q.question_order=question_order
-        q.is_required=q_is_required
-        q.allow_furure_date=future_date
+        q.question_order = question_order
+        q.is_required = q_is_required
+        q.date_validation = q_date_validation
+        q.is_repeatable = q_is_repeatable
 
         q.save()
 
@@ -1063,11 +1076,14 @@ def delete_question(request, q_id):
     if user.access_level.id == 4:
         raise PermissionDenied
     if request.method == 'POST':
-        q.delete()    
+        Response.objects.filter(question=q).delete()
+        QuestionDependance.objects.filter(question=q).delete()
+        Answer.objects.filter(question=q).delete()
+        Question.objects.filter(question=q).delete()    
 
     context = {
         'u': user,
-        'q': q,
+        'q': None,
         'questionnaire': quest_id,
     }
     return render(request, 'survey/question_list.html', context)

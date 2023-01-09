@@ -103,7 +103,7 @@ def facility_partner_list(request):
     user = request.user
     if user.access_level.id != 3:
         raise PermissionDenied
-    partner = Partner.objects.all().order_by('-created_at')
+    partner = Partner.objects.all().order_by('name')
     page = request.GET.get('page', 1)
     paginator = Paginator(partner, 10)
     try:
