@@ -152,6 +152,16 @@
                                 </div>
                             </div>
                         {% endif %}
+                        <div class="col-xl-2 col-2">
+                            <label class="form-control-label" for="activedd">Questionnaire Active?</label>
+                            <div>
+                                <select class="form-control" name="activedd" id="activedd" onchange="facChange()" required>
+                                    <option value="" selected>Select One</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -191,7 +201,7 @@
                 <div class="card-body">
                     <!-- Chart -->
                     <div class="chart" id="chart2">
-                        <canvas id="chart-bar" data-url={% url 'trend-chart' %}"" class="chart-canvas"></canvas>
+                        <canvas id="chart-bar" data-url="{% url 'trend-chart' %}" class="chart-canvas"></canvas>
                     </div>
                 </div>
             </div>
@@ -205,7 +215,7 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
     <script>
         $(function () {
-            $('select').multipleSelect({
+            $('#facility').multipleSelect({
                 multiple: true,
                 multipleWidth: 450,
                 filter: true,
@@ -315,6 +325,7 @@
                     start_date: start.format('YYYY-MM-DD'),
                     end_date: end.format('YYYY-MM-DD'),
                     fac: facilities.val(),
+                    active: $('#activedd').val()
                 },
                 type: 'POST',
                 success: function (data) {
@@ -358,6 +369,7 @@
                     start_date: start.format('YYYY-MM-DD'),
                     end_date: end.format('YYYY-MM-DD'),
                     fac: facilities.val(),
+                    active: $('#activedd').val()
                 },
                 type: 'POST',
                 success: function (data) {
