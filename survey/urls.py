@@ -7,6 +7,7 @@ from django.urls import path
 urlpatterns = [
     #web urls
     path('web/dashboard/', views.index, name='dashboard'),
+    path('dashmetrics/', views.dashmetrics, name='dashmetrics'),
     path('web/questionnaires/', views.questionnaire, name='questionnaires'),
     path('web/new-questionnaire/', views.new_questionnaire, name='new-questionnaires'),
     path('web/edit-questionnaire/<int:q_id>/', views.edit_questionnaire, name='edit-questionnaires'),

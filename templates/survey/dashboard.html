@@ -36,7 +36,7 @@
                         {% if u.access_level.id != 4 %}
                             <div class="col">
                                 <h5 class="card-title text-uppercase text-muted mb-0">Number of facilities</h5>
-                                <span class="h2 font-weight-bold mb-0">{{ fac.count }}</span>
+                                <span id="fac" class="h2 font-weight-bold mb-0">{{ fac.count }}</span>
                             </div>
                         {% else %}
                             <div class="col">
@@ -60,7 +60,7 @@
                     <div class="row">
                         <div class="col">
                             <h5 class="card-title text-uppercase text-muted mb-0">Total Questionnaires</h5>
-                            <span class="h2 font-weight-bold mb-0">{{ quest.count }}</span>
+                            <span id="quest" class="h2 font-weight-bold mb-0">{{ quest.count }}</span>
                         </div>
                         <div class="col-auto">
                             <div class="icon icon-shape bg-gradient-orange text-white rounded-circle shadow">
@@ -78,7 +78,7 @@
                     <div class="row">
                         <div class="col">
                             <h5 class="card-title text-uppercase text-muted mb-0">Active Questionnaires</h5>
-                            <span class="h2 font-weight-bold mb-0">{{ aq.count }}</span>
+                            <span id="aq" class="h2 font-weight-bold mb-0">{{ aq.count }}</span>
                         </div>
                         <div class="col-auto">
                             <div class="icon icon-shape bg-gradient-green text-white rounded-circle shadow">
@@ -96,7 +96,7 @@
                     <div class="row">
                         <div class="col">
                             <h5 class="card-title text-uppercase text-muted mb-0">Total completed surveys</h5>
-                            <span class="h2 font-weight-bold mb-0">{{ resp.count }}</span>
+                            <span id="resp" class="h2 font-weight-bold mb-0">{{ resp.count }}</span>
                         </div>
                         <div class="col-auto">
                             <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow">
@@ -317,6 +317,7 @@
 
         function ChartInit() {
             resetCanvas();
+            
             var $populationChart = $("#population-chart");
             var $trendChart = $('#chart-bar');
             $.ajax({
@@ -373,7 +374,6 @@
                 },
                 type: 'POST',
                 success: function (data) {
-                    console.log(data)
                     new Chart($trendChart, {
                         type: 'bar',
                         data: {
@@ -384,6 +384,22 @@
                             }]
                         }
                     });
+                }
+            });
+            $.ajax({
+                url: "/dashmetrics/",
+                data: {
+                    // start_date: start.format('YYYY-MM-DD'),
+                    // end_date: end.format('YYYY-MM-DD'),
+                    // fac: facilities.val(),
+                    active: $('#activedd').val()
+                },
+                type: 'POST',
+                success: function (data) {
+                    $(aq).text(data.aq)
+                    $(fac).text(data.fac)
+                    $(quest).text(data.quest)
+                    $(resp).text(data.resp)
                 }
             });
         }

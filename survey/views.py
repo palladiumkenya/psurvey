@@ -296,9 +296,15 @@ def get_fac(request):
 @login_required
 def index(request):
     user = request.user
+    is_active = request.POST.get('active')
+    
     if user.access_level.id == 3:
         fac = Facility.objects.all().order_by('county', 'sub_county', 'name')
         quest = Questionnaire.objects.all()
+        if is_active == 'active':
+            quest = Questionnaire.objects.filter(is_active=True).values_list('id', flat=True)
+        elif is_active == 'inactive':
+            quest = Questionnaire.objects.filter(is_active=False).values_list('id', flat=True)
         aq = Questionnaire.objects.filter(is_active=True, active_till__gte=date.today())
         resp = End_Questionnaire.objects.filter()
         queryset = Facility.objects.all().distinct('county')
@@ -338,7 +344,6 @@ def index(request):
         aq = Questionnaire.objects.filter(is_active=True, active_till__gte=date.today(), id__in=que)
         resp = End_Questionnaire.objects.filter(session__started_by__facility=user.facility)
         pat = Started_Questionnaire.objects.filter(started_by__facility=user.facility).distinct('ccc_number').count()
-        print(pat)
 
         context = {
             'u': user,
@@ -368,6 +373,81 @@ def index(request):
             'resp': resp,
         }
         return render(request, 'survey/dashboard.html', context)
+
+def dashmetrics(request):
+    user = request.user
+    is_active = request.POST.get('active')
+    
+    if user.access_level.id == 3:
+        fac = Facility.objects.all().order_by('county', 'sub_county', 'name')
+        quest = Questionnaire.objects.all()
+        if is_active == 'active':
+            quest = Questionnaire.objects.filter(is_active=True).values_list('id', flat=True)
+        elif is_active == 'inactive':
+            quest = Questionnaire.objects.filter(is_active=False).values_list('id', flat=True)
+        aq = Questionnaire.objects.filter(is_active=True, active_till__gte=date.today())
+        resp = End_Questionnaire.objects.filter(questionnaire__in=quest)
+
+    elif user.access_level.id == 2:
+        fac = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
+            partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True)).values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
+
+        quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True)
+                                                      ).values_list('questionnaire').distinct()
+        if is_active == 'active':
+            quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True), 
+                                                          questionnaire__is_active=True
+                                                          ).values_list('questionnaire').distinct()
+        elif is_active == 'inactive':
+            quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True), 
+                                                          questionnaire__is_active=False
+                                                          ).values_list('questionnaire').distinct()
+        aq = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
+                                                   questionnaire__is_active=True,
+                                                   questionnaire__active_till__gte=date.today()
+                                                   ).values_list('questionnaire').distinct()
+
+        resp = End_Questionnaire.objects.filter(questionnaire__in=quest)
+        
+    elif user.access_level.id == 4:
+        que = Facility_Questionnaire.objects.filter(facility_id=user.facility.id).values_list('questionnaire_id').distinct()
+        # fac = Facility.objects.all().order_by('county', 'sub_county', 'name')
+        quest = Questionnaire.objects.filter(id__in=que)
+        if is_active == 'active':
+            quest = Questionnaire.objects.filter(is_active=True).values_list('id', flat=True)
+        elif is_active == 'inactive':
+            quest = Questionnaire.objects.filter(is_active=False).values_list('id', flat=True)
+        aq = Questionnaire.objects.filter(is_active=True, active_till__gte=date.today(), id__in=que)
+        resp = End_Questionnaire.objects.filter(session__started_by__facility=user.facility)
+        fac = Started_Questionnaire.objects.filter(started_by__facility=user.facility).distinct('ccc_number')
+
+    elif user.access_level.id == 5:
+        fac = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
+            partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True)).values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
+
+        quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True)
+                                                      ).values_list('questionnaire').distinct()
+        if is_active == 'active':
+            quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True), 
+                                                          questionnaire__is_active=True
+                                                          ).values_list('questionnaire').distinct()
+        elif is_active == 'inactive':
+            quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True), 
+                                                          questionnaire__is_active=False
+                                                          ).values_list('questionnaire').distinct()
+        aq = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
+                                                   questionnaire__is_active=True,
+                                                   questionnaire__active_till__gte=date.today()
+                                                   ).values_list('questionnaire').distinct()
+
+        resp = End_Questionnaire.objects.filter(questionnaire__in=quest)
+
+    return JsonResponse(data={
+        'fac': fac.count(),
+        'quest': quest.count(),
+        'aq': aq.count(),
+        'resp': resp.count(),
+    })
 
 
 def resp_chart(request):
