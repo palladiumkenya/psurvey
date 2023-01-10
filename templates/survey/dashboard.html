@@ -107,6 +107,40 @@
                 </div>
             </div>
         </div>
+        <!-- <div class="col-xl-3 col-md-6">
+            <div class="card card-stats">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0">Number of Facilities Started Questionnaires</h5>
+                            <span id="startq" class="h2 font-weight-bold mb-0"></span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-gradient-danger text-white rounded-circle shadow">
+                                <i class="ni ni-fat-add"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-stats">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0">Number of Facilities Not Started Questionnaires</h5>
+                            <span id="notstart" class="h2 font-weight-bold mb-0"></span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow">
+                                <i class="ni ni-button-pause"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> -->
     </div>
     </div>
     </div>
@@ -153,13 +187,26 @@
                             </div>
                         {% endif %}
                         <div class="col-xl-2 col-2">
-                            <label class="form-control-label" for="activedd">Questionnaire Active?</label>
+                            <label class="form-control-label" for="activedd">Survey Status</label>
                             <div>
                                 <select class="form-control" name="activedd" id="activedd" onchange="facChange()" required>
                                     <option value="" selected>Select One</option>
                                     <option value="active">Active</option>
                                     <option value="inactive">Inactive</option>
                                 </select>
+                            </div>
+                        </div>
+                        <div class="col-xl-4">
+                            <div class="form-group">
+                                <label class="form-control-label" for="questionnaires">Questionnaires</label>
+                                <div>
+                                    <select multiple="multiple" class="form-control" name="questionnaires" id="questionnaires" placeholder="Questionnaires"
+                                        onchange="facChange()" required>
+                                        {% for f in quest %}
+                                        <option value="{{ f.id }}">{{ f.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -216,6 +263,12 @@
     <script>
         $(function () {
             $('#facility').multipleSelect({
+                multiple: true,
+                multipleWidth: 450,
+                filter: true,
+                filterPlaceholder: 'Search'
+            });
+            $('#questionnaires').multipleSelect({
                 multiple: true,
                 multipleWidth: 450,
                 filter: true,
@@ -326,7 +379,8 @@
                     start_date: start.format('YYYY-MM-DD'),
                     end_date: end.format('YYYY-MM-DD'),
                     fac: facilities.val(),
-                    active: $('#activedd').val()
+                    active: $('#activedd').val(),
+                    questionnaire: $('#questionnaires').val()
                 },
                 type: 'POST',
                 success: function (data) {
@@ -370,7 +424,8 @@
                     start_date: start.format('YYYY-MM-DD'),
                     end_date: end.format('YYYY-MM-DD'),
                     fac: facilities.val(),
-                    active: $('#activedd').val()
+                    active: $('#activedd').val(),
+                    questionnaire: $('#questionnaires').val()
                 },
                 type: 'POST',
                 success: function (data) {
@@ -389,10 +444,8 @@
             $.ajax({
                 url: "/dashmetrics/",
                 data: {
-                    // start_date: start.format('YYYY-MM-DD'),
-                    // end_date: end.format('YYYY-MM-DD'),
-                    // fac: facilities.val(),
-                    active: $('#activedd').val()
+                    active: $('#activedd').val(),
+                    questionnaire: $('#questionnaires').val()
                 },
                 type: 'POST',
                 success: function (data) {

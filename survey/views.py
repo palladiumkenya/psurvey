@@ -297,10 +297,10 @@ def get_fac(request):
 def index(request):
     user = request.user
     is_active = request.POST.get('active')
-    
+
     if user.access_level.id == 3:
         fac = Facility.objects.all().order_by('county', 'sub_county', 'name')
-        quest = Questionnaire.objects.all()
+        quest = Questionnaire.objects.all().order_by('name')
         if is_active == 'active':
             quest = Questionnaire.objects.filter(is_active=True).values_list('id', flat=True)
         elif is_active == 'inactive':
@@ -374,49 +374,73 @@ def index(request):
         }
         return render(request, 'survey/dashboard.html', context)
 
+
 def dashmetrics(request):
     user = request.user
     is_active = request.POST.get('active')
-    
+    qs = request.POST.getlist('questionnaire[]', [])
+
     if user.access_level.id == 3:
         fac = Facility.objects.all().order_by('county', 'sub_county', 'name')
-        quest = Questionnaire.objects.all()
+        if len(qs) > 0:
+            questionnaire = Questionnaire.objects.filter(id__in=qs).values_list('id', flat=True)
+        else:
+            questionnaire = Questionnaire.objects.all().values_list('id', flat=True)
+        quest = Questionnaire.objects.filter(id__in=questionnaire)
+
         if is_active == 'active':
-            quest = Questionnaire.objects.filter(is_active=True).values_list('id', flat=True)
+            quest = Questionnaire.objects.filter(id__in=questionnaire, is_active=True).values_list('id', flat=True)
         elif is_active == 'inactive':
-            quest = Questionnaire.objects.filter(is_active=False).values_list('id', flat=True)
+            quest = Questionnaire.objects.filter(id__in=questionnaire, is_active=False).values_list('id', flat=True)
         aq = Questionnaire.objects.filter(is_active=True, active_till__gte=date.today())
-        resp = End_Questionnaire.objects.filter(questionnaire__in=quest)
+        resp = End_Questionnaire.objects.filter(questionnaire_id__in=quest)
 
     elif user.access_level.id == 2:
         fac = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
             partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True)).values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
 
-        quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True)
-                                                      ).values_list('questionnaire').distinct()
+        if len(qs) > 0:
+            questionnaire = Facility_Questionnaire.objects.filter(questionnaire_id__in=qs, facility_id__in=fac.values_list('id', flat=True)
+                                                    ).values_list('questionnaire').distinct()
+        else:
+            questionnaire = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True)
+                                                    ).values_list('questionnaire').distinct()
+        quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
+                                                        questionnaire__in=questionnaire
+                                                    ).values_list('questionnaire').distinct()
+
         if is_active == 'active':
-            quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True), 
-                                                          questionnaire__is_active=True
-                                                          ).values_list('questionnaire').distinct()
+            quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
+                                                        questionnaire__in=questionnaire,
+                                                        questionnaire__is_active=True
+                                                    ).values_list('questionnaire').distinct()
         elif is_active == 'inactive':
             quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True), 
-                                                          questionnaire__is_active=False
-                                                          ).values_list('questionnaire').distinct()
+                                                        questionnaire__in=questionnaire,
+                                                        questionnaire__is_active=False
+                                                    ).values_list('questionnaire').distinct()
         aq = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
-                                                   questionnaire__is_active=True,
-                                                   questionnaire__active_till__gte=date.today()
-                                                   ).values_list('questionnaire').distinct()
+                                                questionnaire__is_active=True,
+                                                questionnaire__active_till__gte=date.today()
+                                            ).values_list('questionnaire').distinct()
 
         resp = End_Questionnaire.objects.filter(questionnaire__in=quest)
-        
+
     elif user.access_level.id == 4:
-        que = Facility_Questionnaire.objects.filter(facility_id=user.facility.id).values_list('questionnaire_id').distinct()
         # fac = Facility.objects.all().order_by('county', 'sub_county', 'name')
-        quest = Questionnaire.objects.filter(id__in=que)
+
+        if len(qs) > 0:
+            que = Facility_Questionnaire.objects.filter(questionnaire_id__in=qs, facility_id=user.facility.id).values_list('questionnaire_id').distinct()
+            questionnaire = Questionnaire.objects.filter(id__in=que)
+        else:
+            que = Facility_Questionnaire.objects.filter(facility_id=user.facility.id).values_list('questionnaire_id').distinct()
+            questionnaire = Questionnaire.objects.filter(id__in=que)
+        quest = Questionnaire.objects.filter(id__in=que).values_list('id', flat=True)
+
         if is_active == 'active':
-            quest = Questionnaire.objects.filter(is_active=True).values_list('id', flat=True)
+            quest = Questionnaire.objects.filter(id__in=que, is_active=True).values_list('id', flat=True)
         elif is_active == 'inactive':
-            quest = Questionnaire.objects.filter(is_active=False).values_list('id', flat=True)
+            quest = Questionnaire.objects.filter(id__in=que, is_active=False).values_list('id', flat=True)
         aq = Questionnaire.objects.filter(is_active=True, active_till__gte=date.today(), id__in=que)
         resp = End_Questionnaire.objects.filter(session__started_by__facility=user.facility)
         fac = Started_Questionnaire.objects.filter(started_by__facility=user.facility).distinct('ccc_number')
@@ -425,14 +449,26 @@ def dashmetrics(request):
         fac = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
             partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True)).values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
 
-        quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True)
-                                                      ).values_list('questionnaire').distinct()
+        if len(qs) > 0:
+            questionnaire = Facility_Questionnaire.objects.filter(questionnaire_id__in=qs,
+                                                    facility_id__in=fac.values_list('id', flat=True)
+                                                ).values_list('questionnaire').distinct()
+        else:
+            questionnaire = Facility_Questionnaire.objects.filter(
+                                                facility_id__in=fac.values_list('id', flat=True)
+                                            ).values_list('questionnaire').distinct()
+        quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
+                                                    questionnaire__in=questionnaire
+                                                ).values_list('questionnaire').distinct()
+        
         if is_active == 'active':
-            quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True), 
+            quest = Facility_Questionnaire.objects.filter(questionnaire__in=questionnaire,
+                                                          facility_id__in=fac.values_list('id', flat=True), 
                                                           questionnaire__is_active=True
                                                           ).values_list('questionnaire').distinct()
         elif is_active == 'inactive':
-            quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True), 
+            quest = Facility_Questionnaire.objects.filter(questionnaire__in=questionnaire,
+                                                          facility_id__in=fac.values_list('id', flat=True), 
                                                           questionnaire__is_active=False
                                                           ).values_list('questionnaire').distinct()
         aq = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
@@ -454,20 +490,26 @@ def resp_chart(request):
     start = request.POST.get('start_date')
     end = request.POST.get('end_date')
     facilities = request.POST.getlist('fac[]', '')
+    qs = request.POST.getlist('questionnaire[]', [])
     is_active = request.POST.get('active')
-
 
     labels = []
     data = []
     if request.user.access_level.id == 3:
         if facilities == '':
             facilities = Facility.objects.values_list('id', flat=True)
-        questionnaire = Questionnaire.objects.filter().values_list('id', flat=True)
+
+        if len(qs) > 0:
+            quest = Questionnaire.objects.filter(id__in=qs).values_list('id', flat=True)
+        else:
+            quest = Questionnaire.objects.filter().values_list('id', flat=True)
+        questionnaire = Questionnaire.objects.filter(id__in=quest).values_list('id', flat=True)
+
         if is_active == 'active':
-            questionnaire = Questionnaire.objects.filter(is_active=True).values_list('id', flat=True)
+            questionnaire = Questionnaire.objects.filter(id__in=quest, is_active=True).values_list('id', flat=True)
         elif is_active == 'inactive':
-            questionnaire = Questionnaire.objects.filter(is_active=False).values_list('id', flat=True)
-        
+            questionnaire = Questionnaire.objects.filter(id__in=quest, is_active=False).values_list('id', flat=True)
+
         st = Started_Questionnaire.objects.filter(started_by__facility_id__in=facilities, questionnaire__in=questionnaire)
         queryset = Response.objects.filter(
             created_at__gte=start,
@@ -480,11 +522,16 @@ def resp_chart(request):
             facilities = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
                 partner__in=Partner_User.objects.filter(user=request.user).values_list('name', flat=True)).values_list(
                 'facility_id', flat=True))
-        questionnaire = Questionnaire.objects.filter().values_list('id', flat=True)
+        if len(qs) > 0:
+            quest = Questionnaire.objects.filter(id__in=qs).values_list('id', flat=True)
+        else:
+            quest = Questionnaire.objects.filter().values_list('id', flat=True)
+
+        questionnaire = Questionnaire.objects.filter(id__in=quest).values_list('id', flat=True)
         if is_active == 'active':
-            questionnaire = Questionnaire.objects.filter(is_active=True).values_list('id', flat=True)
+            questionnaire = Questionnaire.objects.filter(id__in=quest, is_active=True).values_list('id', flat=True)
         elif is_active == 'inactive':
-            questionnaire = Questionnaire.objects.filter(is_active=False).values_list('id', flat=True)
+            questionnaire = Questionnaire.objects.filter(id__in=quest, is_active=False).values_list('id', flat=True)
         st = Started_Questionnaire.objects.filter(started_by__facility_id__in=facilities, questionnaire__in=questionnaire)
 
         queryset = Response.objects.filter(
@@ -495,11 +542,16 @@ def resp_chart(request):
 
     if request.user.access_level.id == 4:
         facilities =  request.user.facility.id
-        questionnaire = Questionnaire.objects.filter().values_list('id', flat=True)
+        if len(qs) > 0:
+            quest = Questionnaire.objects.filter(id__in=qs).values_list('id', flat=True)
+        else:
+            quest = Questionnaire.objects.filter().values_list('id', flat=True)
+
+        questionnaire = Questionnaire.objects.filter(id__in=quest).values_list('id', flat=True)
         if is_active == 'active':
-            questionnaire = Questionnaire.objects.filter(is_active=True).values_list('id', flat=True)
+            questionnaire = Questionnaire.objects.filter(id__in=quest, is_active=True).values_list('id', flat=True)
         elif is_active == 'inactive':
-            questionnaire = Questionnaire.objects.filter(is_active=False).values_list('id', flat=True)
+            questionnaire = Questionnaire.objects.filter(id__in=quest, is_active=False).values_list('id', flat=True)
         st = Started_Questionnaire.objects.filter(started_by__facility_id=facilities, questionnaire__in=questionnaire)
 
         queryset = Response.objects.filter(
@@ -522,6 +574,7 @@ def trend_chart(request):
     start = request.POST.get('start_date')
     end = request.POST.get('end_date')
     facilities = request.POST.getlist('fac[]', '')
+    qs = request.POST.getlist('questionnaire[]', [])
     is_active = request.POST.get('active')
 
     labels = []
@@ -529,11 +582,15 @@ def trend_chart(request):
     if request.user.access_level.id == 3:
         if facilities == '':
             facilities = Facility.objects.values_list('id', flat=True)
-        questionnaire = Questionnaire.objects.filter().values_list('id', flat=True)
+        if len(qs) > 0:
+            questionnaire = Questionnaire.objects.filter(id__in=qs).values_list('id', flat=True)
+        else:
+            questionnaire = Questionnaire.objects.filter().values_list('id', flat=True)
+        
         if is_active == 'active':
-            questionnaire = Questionnaire.objects.filter(is_active=True).values_list('id', flat=True)
+            questionnaire = Questionnaire.objects.filter(id__in=qs, is_active=True).values_list('id', flat=True)
         elif is_active == 'inactive':
-            questionnaire = Questionnaire.objects.filter(is_active=False).values_list('id', flat=True)
+            questionnaire = Questionnaire.objects.filter(id__in=qs, is_active=False).values_list('id', flat=True)
             
         st = Started_Questionnaire.objects.filter(started_by__facility_id__in=facilities, questionnaire__in=questionnaire)
         re = Response.objects.filter(
@@ -549,11 +606,14 @@ def trend_chart(request):
             facilities = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
                 partner__in=Partner_User.objects.filter(user=request.user).values_list('name', flat=True)).values_list(
                 'facility_id', flat=True))
-        questionnaire = Questionnaire.objects.filter().values_list('id', flat=True)
+        if len(qs) > 0:
+            questionnaire = Questionnaire.objects.filter(id__in=qs).values_list('id', flat=True)
+        else:
+            questionnaire = Questionnaire.objects.filter().values_list('id', flat=True)
         if is_active == 'active':
-            questionnaire = Questionnaire.objects.filter(is_active=True).values_list('id', flat=True)
+            questionnaire = Questionnaire.objects.filter(id__in=qs, is_active=True).values_list('id', flat=True)
         elif is_active == 'inactive':
-            questionnaire = Questionnaire.objects.filter(is_active=False).values_list('id', flat=True)
+            questionnaire = Questionnaire.objects.filter(id__in=qs, is_active=False).values_list('id', flat=True)
             
         st = Started_Questionnaire.objects.filter(started_by__facility_id__in=facilities, questionnaire__in=questionnaire)
 
@@ -565,11 +625,14 @@ def trend_chart(request):
 
     if request.user.access_level.id == 4:
         facilities = request.user.facility.id
-        questionnaire = Questionnaire.objects.filter().values_list('id', flat=True)
+        if len(qs) > 0:
+            questionnaire = Questionnaire.objects.filter(id__in=qs).values_list('id', flat=True)
+        else:
+            questionnaire = Questionnaire.objects.filter().values_list('id', flat=True)
         if is_active == 'active':
-            questionnaire = Questionnaire.objects.filter(is_active=True).values_list('id', flat=True)
+            questionnaire = Questionnaire.objects.filter(id__in=qs, is_active=True).values_list('id', flat=True)
         elif is_active == 'inactive':
-            questionnaire = Questionnaire.objects.filter(is_active=False).values_list('id', flat=True)
+            questionnaire = Questionnaire.objects.filter(id__in=qs, is_active=False).values_list('id', flat=True)
             
         st = Started_Questionnaire.objects.filter(started_by__facility_id=facilities, questionnaire__in=questionnaire)
 
