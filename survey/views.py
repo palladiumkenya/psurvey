@@ -300,7 +300,7 @@ def index(request):
 
     if user.access_level.id == 3:
         fac = Facility.objects.all().order_by('county', 'sub_county', 'name')
-        quest = Questionnaire.objects.all().order_by('name')
+        quest = Questionnaire.objects.filter(is_active=True).order_by('name')
         if is_active == 'active':
             quest = Questionnaire.objects.filter(is_active=True).values_list('id', flat=True)
         elif is_active == 'inactive':
@@ -321,7 +321,7 @@ def index(request):
         fac = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
             partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True)).values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
 
-        quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True)
+        quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True), questionnaire_is_active=True
                                                       ).values_list('questionnaire').distinct()
         aq = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
                                                    questionnaire__is_active=True,
@@ -340,7 +340,7 @@ def index(request):
     elif user.access_level.id == 4:
         que = Facility_Questionnaire.objects.filter(facility_id=user.facility.id).values_list('questionnaire_id').distinct()
         fac = Facility.objects.all().order_by('county', 'sub_county', 'name')
-        quest = Questionnaire.objects.filter(id__in=que)
+        quest = Questionnaire.objects.filter(id__in=que, is_active=True)
         aq = Questionnaire.objects.filter(is_active=True, active_till__gte=date.today(), id__in=que)
         resp = End_Questionnaire.objects.filter(session__started_by__facility=user.facility)
         pat = Started_Questionnaire.objects.filter(started_by__facility=user.facility).distinct('ccc_number').count()
@@ -357,7 +357,7 @@ def index(request):
         fac = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
             partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True)).values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
 
-        quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True)
+        quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True), questionnaire_is_active=True
                                                       ).values_list('questionnaire').distinct()
         aq = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
                                                    questionnaire__is_active=True,
