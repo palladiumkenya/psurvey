@@ -326,7 +326,7 @@ def index(request):
 
         fac_quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True)
                                                 ).values_list('questionnaire').distinct()
-        quest = Questionnaire.objects.filter(id__in=fac_quest)
+        quest = Questionnaire.objects.filter(is_active=True,id__in=fac_quest)
         aq = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
                                                     questionnaire__is_active=True,
                                                     questionnaire__active_till__gte=date.today()
@@ -363,7 +363,7 @@ def index(request):
 
         fac_quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True)
                                                     ).values_list('questionnaire').distinct()
-        quest = Questionnaire.objects.filter(id__in=fac_quest)
+        quest = Questionnaire.objects.filter(is_active=True, id__in=fac_quest)
         aq = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
                                                 questionnaire__is_active=True,
                                                 questionnaire__active_till__gte=date.today()
