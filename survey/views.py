@@ -307,7 +307,8 @@ def index(request):
         elif is_active == 'inactive':
             quest = Questionnaire.objects.filter(is_active=False).values_list('id', flat=True)
         aq = Questionnaire.objects.filter(is_active=True, active_till__gte=date.today())
-        resp = End_Questionnaire.objects.filter()
+        # resp = End_Questionnaire.objects.filter()
+        resp = ResponsesFlat.objects.filter()
         queryset = Facility.objects.all().distinct('county')
         org = Partner.objects.all().order_by('name')
         context = {
