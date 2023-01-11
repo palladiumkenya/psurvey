@@ -417,6 +417,9 @@ def dashmetrics(request):
     elif user.access_level.id == 2:
         fac = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
             partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True)).values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
+        fac_user = Users.objects.filter(facility__in=Partner_Facility.objects.filter(
+            partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True)).values_list('facility_id', flat=True))
+        
 
         if len(qs) > 0:
             questionnaire = Facility_Questionnaire.objects.filter(questionnaire_id__in=qs, facility_id__in=fac.values_list('id', flat=True)
@@ -428,22 +431,22 @@ def dashmetrics(request):
                                                         questionnaire__in=questionnaire
                                                     ).values_list('questionnaire').distinct()
 
-        if is_active == 'active':
-            quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
-                                                        questionnaire__in=questionnaire,
-                                                        questionnaire__is_active=True
-                                                    ).values_list('questionnaire').distinct()
-        elif is_active == 'inactive':
-            quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True), 
-                                                        questionnaire__in=questionnaire,
-                                                        questionnaire__is_active=False
-                                                    ).values_list('questionnaire').distinct()
+        # if is_active == 'active':
+        #     quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
+        #                                                 questionnaire__in=questionnaire,
+        #                                                 questionnaire__is_active=True
+        #                                             ).values_list('questionnaire').distinct()
+        # elif is_active == 'inactive':
+        #     quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True), 
+        #                                                 questionnaire__in=questionnaire,
+        #                                                 questionnaire__is_active=False
+        #                                             ).values_list('questionnaire').distinct()
         aq = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
                                                 questionnaire__is_active=True,
                                                 questionnaire__active_till__gte=date.today()
                                             ).values_list('questionnaire').distinct()
 
-        resp = End_Questionnaire.objects.filter(questionnaire__in=quest)
+        resp = End_Questionnaire.objects.filter(questionnaire__in=quest, session__started_by__in=fac_user)
 
     elif user.access_level.id == 4:
         # fac = Facility.objects.all().order_by('county', 'sub_county', 'name')
@@ -467,6 +470,8 @@ def dashmetrics(request):
     elif user.access_level.id == 5:
         fac = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
             partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True)).values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
+        fac_user = Users.objects.filter(facility__in=Partner_Facility.objects.filter(
+            partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True)).values_list('facility_id', flat=True))
 
         if len(qs) > 0:
             questionnaire = Facility_Questionnaire.objects.filter(questionnaire_id__in=qs,
@@ -480,22 +485,22 @@ def dashmetrics(request):
                                                     questionnaire__in=questionnaire
                                                 ).values_list('questionnaire').distinct()
         
-        if is_active == 'active':
-            quest = Facility_Questionnaire.objects.filter(questionnaire__in=questionnaire,
-                                                          facility_id__in=fac.values_list('id', flat=True), 
-                                                          questionnaire__is_active=True
-                                                          ).values_list('questionnaire').distinct()
-        elif is_active == 'inactive':
-            quest = Facility_Questionnaire.objects.filter(questionnaire__in=questionnaire,
-                                                          facility_id__in=fac.values_list('id', flat=True), 
-                                                          questionnaire__is_active=False
-                                                          ).values_list('questionnaire').distinct()
+        # if is_active == 'active':
+        #     quest = Facility_Questionnaire.objects.filter(questionnaire__in=questionnaire,
+        #                                                   facility_id__in=fac.values_list('id', flat=True), 
+        #                                                   questionnaire__is_active=True
+        #                                                   ).values_list('questionnaire').distinct()
+        # elif is_active == 'inactive':
+        #     quest = Facility_Questionnaire.objects.filter(questionnaire__in=questionnaire,
+        #                                                   facility_id__in=fac.values_list('id', flat=True), 
+        #                                                   questionnaire__is_active=False
+        #                                                   ).values_list('questionnaire').distinct()
         aq = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
-                                                   questionnaire__is_active=True,
-                                                   questionnaire__active_till__gte=date.today()
-                                                   ).values_list('questionnaire').distinct()
+                                                questionnaire__is_active=True,
+                                                questionnaire__active_till__gte=date.today()
+                                            ).values_list('questionnaire').distinct()
 
-        resp = End_Questionnaire.objects.filter(questionnaire__in=quest)
+        resp = End_Questionnaire.objects.filter(questionnaire__in=quest, session__started_by__in=fac_user)
 
     return JsonResponse(data={
         'fac': fac.count(),
