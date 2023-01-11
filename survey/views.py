@@ -321,7 +321,7 @@ def index(request):
         fac = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
             partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True)).values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
 
-        quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True), questionnaire_is_active=True
+        quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True)
                                                       ).values_list('questionnaire').distinct()
         aq = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
                                                    questionnaire__is_active=True,
@@ -357,7 +357,7 @@ def index(request):
         fac = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
             partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True)).values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
 
-        quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True), questionnaire_is_active=True
+        quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True)
                                                       ).values_list('questionnaire').distinct()
         aq = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
                                                    questionnaire__is_active=True,
