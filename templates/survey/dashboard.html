@@ -472,6 +472,8 @@
             $.ajax({
                 url: "/dashmetrics/",
                 data: {
+                    start_date: start.format('YYYY-MM-DD'),
+                    end_date: end.format('YYYY-MM-DD'),
                     active: $('#activedd').val(),
                     questionnaire: $('#questionnaires').val(),
                     org: $('#org').val()
