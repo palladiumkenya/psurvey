@@ -36,7 +36,7 @@
                         {% if u.access_level.id != 4 %}
                             <div class="col">
                                 <h5 class="card-title text-uppercase text-muted mb-0">Number of facilities</h5>
-                                <span class="h2 font-weight-bold mb-0">{{ fac.count }}</span>
+                                <span id="fac" class="h2 font-weight-bold mb-0">{{ fac.count }}</span>
                             </div>
                         {% else %}
                             <div class="col">
@@ -60,7 +60,7 @@
                     <div class="row">
                         <div class="col">
                             <h5 class="card-title text-uppercase text-muted mb-0">Total Questionnaires</h5>
-                            <span class="h2 font-weight-bold mb-0">{{ quest.count }}</span>
+                            <span id="quest" class="h2 font-weight-bold mb-0">{{ quest.count }}</span>
                         </div>
                         <div class="col-auto">
                             <div class="icon icon-shape bg-gradient-orange text-white rounded-circle shadow">
@@ -78,7 +78,7 @@
                     <div class="row">
                         <div class="col">
                             <h5 class="card-title text-uppercase text-muted mb-0">Active Questionnaires</h5>
-                            <span class="h2 font-weight-bold mb-0">{{ aq.count }}</span>
+                            <span id="aq" class="h2 font-weight-bold mb-0">{{ aq.count }}</span>
                         </div>
                         <div class="col-auto">
                             <div class="icon icon-shape bg-gradient-green text-white rounded-circle shadow">
@@ -96,7 +96,7 @@
                     <div class="row">
                         <div class="col">
                             <h5 class="card-title text-uppercase text-muted mb-0">Total completed surveys</h5>
-                            <span class="h2 font-weight-bold mb-0">{{ resp.count }}</span>
+                            <span id="resp" class="h2 font-weight-bold mb-0">{{ resp.count }}</span>
                         </div>
                         <div class="col-auto">
                             <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow">
@@ -107,6 +107,40 @@
                 </div>
             </div>
         </div>
+        <!-- <div class="col-xl-3 col-md-6">
+            <div class="card card-stats">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0">Number of Facilities Started Questionnaires</h5>
+                            <span id="startq" class="h2 font-weight-bold mb-0"></span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-gradient-danger text-white rounded-circle shadow">
+                                <i class="ni ni-fat-add"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-stats">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0">Number of Facilities Not Started Questionnaires</h5>
+                            <span id="notstart" class="h2 font-weight-bold mb-0"></span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow">
+                                <i class="ni ni-button-pause"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div> -->
     </div>
     </div>
     </div>
@@ -128,6 +162,19 @@
                 <div class="card-body">
                     <div class="row">
                         <div class="col-xl-4">
+                            <div class="form-group">
+                                <label class="form-control-label" for="questionnaires">Questionnaires</label>
+                                <div>
+                                    <select multiple="multiple" class="form-control" name="questionnaires" id="questionnaires"
+                                        placeholder="Questionnaires" onchange="facChange()" required>
+                                        {% for f in quest %}
+                                        <option value="{{ f.id }}">{{ f.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-xl-4">
 
                             <label class="form-control-label" for="reportrange">Date Range</label>
                             <div id="reportrange"
@@ -137,7 +184,7 @@
                             </div>
                         </div>
                         {% if u.access_level.id != 4 %}
-                            <div class="col-xl-6">
+                            <div class="col-xl-4">
                                 <div class="form-group">
                                     <label class="form-control-label" for="facility">Facilities</label>
                                     <div>
@@ -152,6 +199,31 @@
                                 </div>
                             </div>
                         {% endif %}
+                        {% if u.access_level.id == 3 %}
+                            <div class="col-xl-4">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="org">Organizations</label>
+                                    <div>
+                                        <select multiple="multiple" class="form-control" name="org" id="org"
+                                                placeholder="Organizations" onchange="facChange()" required>
+                                            {% for f in org %}
+                                                <option value="{{ f.id }}">{{ f.name }} </option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        <!-- <div class="col-xl-2 col-2">
+                            <label class="form-control-label" for="activedd">Survey Status</label>
+                            <div>
+                                <select class="form-control" name="activedd" id="activedd" onchange="facChange()" required>
+                                    <option value="" selected>Select One</option>
+                                    <option value="active">Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                        </div> -->
                     </div>
                 </div>
             </div>
@@ -184,14 +256,14 @@
                     <div class="row align-items-center">
                         <div class="col">
                             <h6 class="text-uppercase text-muted ls-1 mb-1">Performance</h6>
-                            <h5 class="h3 text-white mb-0">Responses Performance</h5>
+                            <h5 class="h3 text-white mb-0">Surveys' Performance</h5>
                         </div>
                     </div>
                 </div>
                 <div class="card-body">
                     <!-- Chart -->
                     <div class="chart" id="chart2">
-                        <canvas id="chart-bar" data-url={% url 'trend-chart' %}"" class="chart-canvas"></canvas>
+                        <canvas id="chart-bar" data-url="{% url 'trend-chart' %}" class="chart-canvas"></canvas>
                     </div>
                 </div>
             </div>
@@ -205,7 +277,19 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css"/>
     <script>
         $(function () {
-            $('select').multipleSelect({
+            $('#facility').multipleSelect({
+                multiple: true,
+                multipleWidth: 450,
+                filter: true,
+                filterPlaceholder: 'Search'
+            });
+            $('#questionnaires').multipleSelect({
+                multiple: true,
+                multipleWidth: 450,
+                filter: true,
+                filterPlaceholder: 'Search'
+            });
+            $('#org').multipleSelect({
                 multiple: true,
                 multipleWidth: 450,
                 filter: true,
@@ -307,6 +391,7 @@
 
         function ChartInit() {
             resetCanvas();
+            
             var $populationChart = $("#population-chart");
             var $trendChart = $('#chart-bar');
             $.ajax({
@@ -315,6 +400,9 @@
                     start_date: start.format('YYYY-MM-DD'),
                     end_date: end.format('YYYY-MM-DD'),
                     fac: facilities.val(),
+                    active: $('#activedd').val(),
+                    questionnaire: $('#questionnaires').val(),
+                    org: $('#org').val()
                 },
                 type: 'POST',
                 success: function (data) {
@@ -358,20 +446,42 @@
                     start_date: start.format('YYYY-MM-DD'),
                     end_date: end.format('YYYY-MM-DD'),
                     fac: facilities.val(),
+                    active: $('#activedd').val(),
+                    questionnaire: $('#questionnaires').val(),
+                    org: $('#org').val()
                 },
                 type: 'POST',
                 success: function (data) {
-                    console.log(data)
                     new Chart($trendChart, {
                         type: 'bar',
                         data: {
                             labels: data.labels,
                             datasets: [{
-                                label: 'Responses',
-                                data: data.data
+                                label: 'Incomplete Surveys',
+                                data: data.data[0],
+                                backgroundColor: '#3498db',
+                            },{
+                                label: 'Completed Surveys',
+                                data: data.data[1],
+                                backgroundColor: '#6C911F'
                             }]
                         }
                     });
+                }
+            });
+            $.ajax({
+                url: "/dashmetrics/",
+                data: {
+                    active: $('#activedd').val(),
+                    questionnaire: $('#questionnaires').val(),
+                    org: $('#org').val()
+                },
+                type: 'POST',
+                success: function (data) {
+                    $(aq).text(data.aq)
+                    $(fac).text(data.fac)
+                    $(quest).text(data.quest)
+                    $(resp).text(data.resp)
                 }
             });
         }
