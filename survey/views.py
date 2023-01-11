@@ -361,12 +361,13 @@ def index(request):
         fac = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
             partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True)).values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
 
-        quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True)
-                                                      ).values_list('questionnaire').distinct()
+        fac_quest = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True)
+                                                    ).values_list('questionnaire').distinct()
+        quest = Questionnaire.objects.filter(id__in=fac_quest)
         aq = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('id', flat=True),
-                                                   questionnaire__is_active=True,
-                                                   questionnaire__active_till__gte=date.today()
-                                                   ).values_list('questionnaire').distinct()
+                                                questionnaire__is_active=True,
+                                                questionnaire__active_till__gte=date.today()
+                                            ).values_list('questionnaire').distinct()
 
         resp = End_Questionnaire.objects.filter(questionnaire__in=quest)
         context = {
