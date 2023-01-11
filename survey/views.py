@@ -385,6 +385,8 @@ def dashmetrics(request):
     is_active = request.POST.get('active')
     qs = request.POST.getlist('questionnaire[]', [])
     org = request.POST.getlist('org[]', [])
+    start = request.POST.get('start_date')
+    end = request.POST.get('end_date')
 
     if user.access_level.id == 3:
         fac = Facility.objects.all().order_by('county', 'sub_county', 'name')
@@ -410,9 +412,11 @@ def dashmetrics(request):
         # elif is_active == 'inactive':
         #     quest = Questionnaire.objects.filter(id__in=questionnaire, is_active=False).values_list('id', flat=True)
         aq = Questionnaire.objects.filter(is_active=True, active_till__gte=date.today())
-        st = Started_Questionnaire.objects.filter(started_by__facility__in=fac, questionnaire__in=quest)
+        act_resp = Response.objects.filter(
+            created_at__gte=start,
+            created_at__lte=end).values_list('session_id')
+        st = Started_Questionnaire.objects.filter(id__in=act_resp,started_by__facility__in=fac, questionnaire__in=quest)
         resp = End_Questionnaire.objects.filter(session__in=st, questionnaire__in=quest)
-        
 
     elif user.access_level.id == 2:
         fac = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
@@ -446,7 +450,10 @@ def dashmetrics(request):
                                                 questionnaire__active_till__gte=date.today()
                                             ).values_list('questionnaire').distinct()
 
-        resp = End_Questionnaire.objects.filter(questionnaire__in=quest, session__started_by__in=fac_user)
+        act_resp = Response.objects.filter(
+            created_at__gte=start,
+            created_at__lte=end).values_list('session_id')
+        resp = End_Questionnaire.objects.filter(questionnaire__in=quest, session_id__in=act_resp, session__started_by__in=fac_user)
 
     elif user.access_level.id == 4:
         # fac = Facility.objects.all().order_by('county', 'sub_county', 'name')
@@ -464,7 +471,11 @@ def dashmetrics(request):
         elif is_active == 'inactive':
             quest = Questionnaire.objects.filter(id__in=que, is_active=False).values_list('id', flat=True)
         aq = Questionnaire.objects.filter(is_active=True, active_till__gte=date.today(), id__in=que)
-        resp = End_Questionnaire.objects.filter(session__started_by__facility=user.facility)
+        
+        act_resp = Response.objects.filter(
+            created_at__gte=start,
+            created_at__lte=end).values_list('session_id')
+        resp = End_Questionnaire.objects.filter(session__started_by__facility=user.facility, session_id__in=act_resp)
         fac = Started_Questionnaire.objects.filter(started_by__facility=user.facility).distinct('ccc_number')
 
     elif user.access_level.id == 5:
@@ -500,7 +511,12 @@ def dashmetrics(request):
                                                 questionnaire__active_till__gte=date.today()
                                             ).values_list('questionnaire').distinct()
 
-        resp = End_Questionnaire.objects.filter(questionnaire__in=quest, session__started_by__in=fac_user)
+        act_resp = Response.objects.filter(
+            created_at__gte=start,
+            created_at__lte=end).values_list('session_id')
+        resp = End_Questionnaire.objects.filter(questionnaire__in=quest, 
+                                                session_id__in=act_resp, 
+                                                session__started_by__in=fac_user)
 
     return JsonResponse(data={
         'fac': fac.count(),
