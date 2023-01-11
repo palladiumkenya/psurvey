@@ -124,3 +124,36 @@ class Group_Questionnaire (models.Model):
 
     class Meta:
         db_table = "Group_Questionnaire"
+
+
+class ResponsesFlat(models.Model):
+    survey_id = models.CharField(max_length=100, null=True)
+    submit_date = models.CharField(max_length=100, null=True)
+    partner_name = models.CharField(max_length=100, null=True)
+    county = models.CharField(max_length=100, null=True)
+    sub_county = models.CharField(max_length=100, null=True)
+    mfl_code = models.CharField(max_length=100, null=True)
+    facility_name = models.CharField(max_length=100, null=True)
+    ccc_no = models.CharField(max_length=100, null=True)
+    first_name = models.CharField(max_length=100, null=True)
+    middle_name = models.CharField(max_length=100, null=True)
+    last_name = models.CharField(max_length=100, null=True)
+    date_of_birth = models.CharField(max_length=100, null=True)
+    gender = models.CharField(max_length=100, null=True)
+    date_of_hiv_diagnosis = models.CharField(max_length=100, null=True)
+    ccc_enrolment_date = models.CharField(max_length=100, null=True)
+    art_start_date = models.CharField(max_length=100, null=True)
+    date_of_last_vl = models.CharField(max_length=100, null=True)
+    last_vl_result = models.CharField(max_length=100, null=True)
+    copies_per_ml = models.CharField(max_length=100, null=True)
+    number_of_visits = models.CharField(max_length=100, null=True)
+    visit_dates = models.CharField(max_length=100, null=True)
+    last_appointment_date = models.CharField(max_length=100, null=True)
+    current_regimen = models.CharField(max_length=100, null=True)
+    other_current_regimen = models.CharField(max_length=100, null=True)
+    non_verification_reason = models.CharField(max_length=100, null=True)
+    other_non_verification_reason = models.CharField(max_length=100, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "vw_questionnaire_responses_flat_table"
