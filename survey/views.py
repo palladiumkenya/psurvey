@@ -450,7 +450,10 @@ def dashmetrics(request):
                                                 questionnaire__active_till__gte=date.today()
                                             ).values_list('questionnaire').distinct()
 
-        resp = End_Questionnaire.objects.filter(questionnaire__in=quest, session__started_by__in=fac_user)
+        act_resp = Response.objects.filter(
+            created_at__gte=start,
+            created_at__lte=end).values_list('session_id')
+        resp = End_Questionnaire.objects.filter(questionnaire__in=quest, session_id__in=act_resp, session__started_by__in=fac_user)
 
     elif user.access_level.id == 4:
         # fac = Facility.objects.all().order_by('county', 'sub_county', 'name')
@@ -468,7 +471,11 @@ def dashmetrics(request):
         elif is_active == 'inactive':
             quest = Questionnaire.objects.filter(id__in=que, is_active=False).values_list('id', flat=True)
         aq = Questionnaire.objects.filter(is_active=True, active_till__gte=date.today(), id__in=que)
-        resp = End_Questionnaire.objects.filter(session__started_by__facility=user.facility)
+        
+        act_resp = Response.objects.filter(
+            created_at__gte=start,
+            created_at__lte=end).values_list('session_id')
+        resp = End_Questionnaire.objects.filter(session__started_by__facility=user.facility, session_id__in=act_resp)
         fac = Started_Questionnaire.objects.filter(started_by__facility=user.facility).distinct('ccc_number')
 
     elif user.access_level.id == 5:
@@ -504,7 +511,12 @@ def dashmetrics(request):
                                                 questionnaire__active_till__gte=date.today()
                                             ).values_list('questionnaire').distinct()
 
-        resp = End_Questionnaire.objects.filter(questionnaire__in=quest, session__started_by__in=fac_user)
+        act_resp = Response.objects.filter(
+            created_at__gte=start,
+            created_at__lte=end).values_list('session_id')
+        resp = End_Questionnaire.objects.filter(questionnaire__in=quest, 
+                                                session_id__in=act_resp, 
+                                                session__started_by__in=fac_user)
 
     return JsonResponse(data={
         'fac': fac.count(),
