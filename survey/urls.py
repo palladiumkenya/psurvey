@@ -1,8 +1,8 @@
 from django.conf.urls import url
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from django.urls import path
 
 from . import views
-from django.urls import path
 
 urlpatterns = [
     #web urls
