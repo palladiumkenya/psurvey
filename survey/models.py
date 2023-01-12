@@ -127,7 +127,7 @@ class Group_Questionnaire (models.Model):
 
 
 class ResponsesFlat(models.Model):
-    survey_id = models.CharField(max_length=100, null=True)
+    survey_id = models.CharField(max_length=100, primary_key=True)
     submit_date = models.CharField(max_length=100, null=True)
     partner_name = models.CharField(max_length=100, null=True)
     county = models.CharField(max_length=100, null=True)
@@ -157,3 +157,4 @@ class ResponsesFlat(models.Model):
     class Meta:
         managed = False
         db_table = "vw_questionnaire_responses_flat_table"
+        unique_together = ('survey_id', 'ccc_no', 'other_non_verification_reason', 'date_of_last_vl', 'art_start_date', 'gender')

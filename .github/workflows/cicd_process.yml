@@ -1,7 +1,7 @@
 name: deploy to test instance
 on:
   push:
-    branches: [ cicd ]
+    branches: [ dev ]
 jobs:
 
   build:
@@ -23,7 +23,7 @@ jobs:
           git config --global --add safe.directory /apps/github-workflows/mhealth-apps/psurvey    
 
           cd psurvey/
-          git clone -b master https://github.com/palladiumkenya/psurvey.git .
+          git clone -b dev https://github.com/palladiumkenya/psurvey.git .
           git status
           cp  /apps/dockerApps/psurvey/python.dockerfile /apps/github-workflows/mhealth-apps/psurvey
           cp  /apps/dockerApps/psurvey/nginx.dockerfile /apps/github-workflows/mhealth-apps/psurvey
@@ -32,5 +32,5 @@ jobs:
           # cp -r /apps/dockerApps/psurvey/docker/ /apps/github-workflows/mhealth-apps/psurvey
           docker-compose stop pythonapp
           docker-compose rm -f pythonapp
-          docker-compose up -d --build pythonapp
+          docker-compose up -d  pythonapp
 
