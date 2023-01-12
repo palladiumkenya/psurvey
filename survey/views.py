@@ -10,7 +10,7 @@ from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.core.serializers import serialize
 from django.db import transaction, IntegrityError
-from django.db.models import Count
+from django.db.models import Count, F
 from django.db.models.functions import Cast, TruncMonth
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render, redirect
@@ -754,6 +754,52 @@ def trend_chart(request):
         'data': [data, data1],
     })
 
+
+def partner_chart(request):
+    start = request.POST.get('start_date')
+    end = request.POST.get('end_date')
+    facilities = request.POST.getlist('fac[]', '')
+    qs = request.POST.getlist('questionnaire[]', [])
+    is_active = request.POST.get('active')
+    org = request.POST.getlist('org[]', [])
+
+    labels = []
+    data = []
+    data1 = []
+
+    if request.user.access_level.id == 3:
+        if facilities == '':
+            facilities = Facility.objects.values_list('id', flat=True)
+
+        unverified = Partner.objects.filter().values('name', 'unverified')
+        submitted =ResponsesFlat.objects.filter().annotate(name=F('partner_name')
+            ).values('name').annotate(c=Count('survey_id')).values('name', 'c').order_by('c')
+        
+        # print(submitted)
+        model_combination = list(chain(unverified, submitted))
+        out = {}
+        for d in model_combination:
+            out[d["name"]] = {**out.get(d["name"], {}), **d}
+
+        out = list(out.values())
+        #get percentages
+        for o in out:
+            try:
+                o['perc'] = (o['unverified'] - o['c']) * 100/o['unverified']
+                data1.append(o)
+            except:
+                pass
+        #sort
+        data1 = sorted(data1, key=lambda d: d['perc'], reverse=True) 
+
+        for p in data1:
+            labels.append(p['name'])
+            data.append(p['perc'])
+
+    return JsonResponse(data={
+        'labels': labels,
+        'data': data,
+    })
 
 @login_required
 def new_questionnaire(request):

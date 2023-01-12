@@ -268,6 +268,23 @@
                 </div>
             </div>
         </div>
+        <div class="col-xl-12">
+            <div class="card bg-default">
+                <div class="card-header bg-transparent">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h5 class="h3 text-white mb-0">Partners' Performance</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Chart -->
+                    <div class="chart" id="chart3">
+                        <canvas id="partner-bar" data-url="{% url 'partner-chart' %}" class="chart-canvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}
 {% block scripts %}
@@ -383,6 +400,13 @@
                 "                                class=\"chart-canvas\"></canvas>");
 
             canvas = document.querySelector('#chart-bar');
+            
+            $('#partner-bar').remove(); // this is my <canvas> element
+            div = document.querySelector("#chart3");
+            div.insertAdjacentHTML("afterbegin", "<canvas id=\"partner-bar\" data-url=\"{% url 'partner-chart' %}\"\n" +
+                "                                class=\"chart-canvas\"></canvas>");
+
+            canvas = document.querySelector('#chart-bar');
         }
 
         function facChange() {
@@ -394,6 +418,7 @@
             
             var $populationChart = $("#population-chart");
             var $trendChart = $('#chart-bar');
+            var $partnerChart = $('#partner-bar');
             $.ajax({
                 url: $populationChart.data("url"),
                 data: {
@@ -465,6 +490,48 @@
                                 data: data.data[1],
                                 backgroundColor: '#6C911F'
                             }]
+                        }
+                    });
+                }
+            });
+            $.ajax({
+                url: $partnerChart.data("url"),
+                data: {
+                    start_date: start.format('YYYY-MM-DD'),
+                    end_date: end.format('YYYY-MM-DD'),
+                    fac: facilities.val(),
+                    active: $('#activedd').val(),
+                    questionnaire: $('#questionnaires').val(),
+                    org: $('#org').val()
+                },
+                type: 'POST',
+                success: function (data) {
+                    new Chart($partnerChart, {
+                        type: 'bar',
+                        data: {
+                            labels: data.labels,
+                            datasets: [{
+                            //     label: 'Incomplete Surveys',
+                            //     data: data.data[0],
+                            //     backgroundColor: '#3498db',
+                            // },{
+                                label: '% Pending Surveys',
+                                data: data.data,
+                                beginAtZero: true,
+                                backgroundColor: '#AC911F'
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                y:{
+                                    min:0
+                                },
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero: true,
+                                    }
+                                }]
+                            }
                         }
                     });
                 }
