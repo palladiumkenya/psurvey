@@ -422,15 +422,19 @@ def dashmetrics(request):
             quest_org = Facility_Questionnaire.objects.filter(questionnaire__in=qs, facility_id__in=part_fac.values_list('facility', flat=True))
             quest = Questionnaire.objects.filter(id__in=quest_org.values_list('questionnaire', flat=True))
             fac = Facility.objects.filter(id__in=part_fac.values_list('facility', flat=True))
+            resp = ResponsesFlat.objects.filter(partner_name__in=part_fac.values_list('partner__name', flat=True))
         elif len(qs) > 0:
             quest = Questionnaire.objects.filter(id__in=qs)
+            resp = ResponsesFlat.objects.filter()
         elif len(org) > 0:
             part_fac = Partner_Facility.objects.filter(partner_id__in=org)
             quest_org = Facility_Questionnaire.objects.filter(facility_id__in=part_fac.values_list('facility', flat=True))
             quest = Questionnaire.objects.filter(id__in=quest_org.values_list('questionnaire', flat=True))
             fac = Facility.objects.filter(id__in=part_fac.values_list('facility', flat=True))
+            resp = ResponsesFlat.objects.filter(partner_name__in=part_fac.values_list('partner__name', flat=True))
         else:
             quest = Questionnaire.objects.all()
+            resp = ResponsesFlat.objects.filter()
 
         # quest = Questionnaire.objects.filter(id__in=questionnaire).values_list('id', flat=True)
 
@@ -443,7 +447,7 @@ def dashmetrics(request):
             created_at__gte=start,
             created_at__lte=end).values_list('session_id')
         st = Started_Questionnaire.objects.filter(id__in=act_resp,started_by__facility__in=fac, questionnaire__in=quest)
-        resp = ResponsesFlat.objects.filter()
+        # resp = ResponsesFlat.objects.filter()
 
     elif user.access_level.id == 2:
         fac = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
@@ -781,11 +785,8 @@ def trend_chart(request):
 
 
 def partner_chart(request):
-    start = request.POST.get('start_date')
-    end = request.POST.get('end_date')
     facilities = request.POST.getlist('fac[]', '')
     qs = request.POST.getlist('questionnaire[]', [])
-    is_active = request.POST.get('active')
     org = request.POST.getlist('org[]', [])
 
     labels = []
@@ -796,11 +797,28 @@ def partner_chart(request):
         if facilities == '':
             facilities = Facility.objects.values_list('id', flat=True)
 
-        unverified = Partner.objects.filter().values('name', 'unverified')
-        submitted =ResponsesFlat.objects.filter().annotate(name=F('partner_name')
-            ).values('name').annotate(c=Count('survey_id')).values('name', 'c').order_by('c')
-        
-        # print(submitted)
+        if len(qs) > 0 and len(org) > 0:
+            part_fac = Partner_Facility.objects.filter(partner_id__in=org)
+            unverified = Partner.objects.filter(id__in=part_fac.values_list('partner', flat=True)).values('name', 'unverified')
+            submitted =ResponsesFlat.objects.filter(partner_name__in=unverified.values_list('name', flat=True)).annotate(name=F('partner_name')
+                ).values('name').annotate(c=Count('survey_id')).values('name', 'c').order_by('c')
+        elif len(qs) > 0:
+            part_fac = Partner_Facility.objects.filter(facility_id__in=facilities)
+            unverified = Partner.objects.filter(id__in=part_fac.values_list('partner', flat=True)).values('name', 'unverified')
+            submitted =ResponsesFlat.objects.filter(partner_name__in=unverified.values_list('name', flat=True)).annotate(name=F('partner_name')
+                ).values('name').annotate(c=Count('survey_id')).values('name', 'c').order_by('c')
+        elif len(org) > 0:
+            part_fac = Partner_Facility.objects.filter(partner_id__in=org)
+            unverified = Partner.objects.filter(id__in=part_fac.values_list('partner', flat=True)).values('name', 'unverified')
+            submitted =ResponsesFlat.objects.filter(partner_name__in=unverified.values_list('name', flat=True)).annotate(name=F('partner_name')
+                ).values('name').annotate(c=Count('survey_id')).values('name', 'c').order_by('c')
+        else:
+            part_fac = Partner_Facility.objects.filter(facility_id__in=facilities)
+            unverified = Partner.objects.filter(id__in=part_fac.values_list('partner', flat=True)).values('name', 'unverified')
+            submitted =ResponsesFlat.objects.filter(partner_name__in=unverified.values_list('name', flat=True)).annotate(name=F('partner_name')
+                ).values('name').annotate(c=Count('survey_id')).values('name', 'c').order_by('c')
+
+
         model_combination = list(chain(unverified, submitted))
         out = {}
         for d in model_combination:
