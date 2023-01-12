@@ -327,7 +327,7 @@ def index(request):
         #get percentages
         for o in out:
             try:
-                o['perc'] = float("{0:.2f}".format((o['unverified'] - o['c']) * 100/o['unverified']))
+                o['perc'] = float("{0:.2f}".format((o['c']) * 100/o['unverified']))
                 o['pending'] = o['unverified'] - o['c']
                 data1.append(o)
             except:
@@ -793,7 +793,7 @@ def partner_chart(request):
     data = []
     data1 = []
 
-    if request.user.access_level.id == 3:
+    if request.user.access_level.id == 2 or request.user.access_level.id == 3:
         if facilities == '':
             facilities = Facility.objects.values_list('id', flat=True)
 
@@ -828,8 +828,13 @@ def partner_chart(request):
         #get percentages
         for o in out:
             try:
-                o['perc'] = round((o['unverified'] - o['c']) * 100/o['unverified'] ,2)
-                o['pending'] = o['unverified'] - o['c']
+                o['perc'] = round((o['c']) * 100/o['unverified'] ,2)
+                if o['perc'] < 1:
+                    o['perc'] = 0   
+                elif o['perc'] > 100:
+                    o['perc'] = 100
+
+                o['pending'] = o['c']
                 data1.append(o)
             except:
                 pass
