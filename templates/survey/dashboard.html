@@ -268,6 +268,7 @@
                 </div>
             </div>
         </div>
+        {% if u.access_level.id == 3 %}
         <div class="col-xl-12">
             <div class="card bg-default">
                 <div class="card-header bg-transparent">
@@ -285,6 +286,31 @@
                 </div>
             </div>
         </div>
+        <div class="table-responsive">
+            <table class="table align-items-center table-flush table-dark">
+                <thead class="thead-dark">
+                    <tr>
+                        <th scope="col">Partner</th>
+                        <th scope="col">#Unverified</th>
+                        <th scope="col">Surveys received</th>
+                        <th scope="col">Pending surveys</th>
+                        <th scope="col">% Pending surveys</th>
+                    </tr>
+                </thead>
+                <tbody class="list">
+                    {% for foo in data %}
+                    <tr>
+                        <td>{{ foo.name }}</td>
+                        <td>{{ foo.unverified }}</td>
+                        <td>{{ foo.c }}</td>
+                        <td>{{ foo.pending }}</td>
+                        <td>{{ foo.perc }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% endif %}
     </div>
 {% endblock %}
 {% block scripts %}

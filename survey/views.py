@@ -311,6 +311,30 @@ def index(request):
         resp = ResponsesFlat.objects.filter()
         queryset = Facility.objects.all().distinct('county')
         org = Partner.objects.all().order_by('name')
+
+        data1 = []
+        unverified = Partner.objects.filter().values('name', 'unverified')
+        submitted =ResponsesFlat.objects.filter().annotate(name=F('partner_name')
+            ).values('name').annotate(c=Count('survey_id')).values('name', 'c').order_by('c')
+
+        # print(submitted)
+        model_combination = list(chain(unverified, submitted))
+        out = {}
+        for d in model_combination:
+            out[d["name"]] = {**out.get(d["name"], {}), **d}
+
+        out = list(out.values())
+        #get percentages
+        for o in out:
+            try:
+                o['perc'] = float("{0:.2f}".format((o['unverified'] - o['c']) * 100/o['unverified']))
+                o['pending'] = o['unverified'] - o['c']
+                data1.append(o)
+            except:
+                pass
+        #sort
+        data1 = sorted(data1, key=lambda d: d['perc'], reverse=True) 
+
         context = {
             'u': user,
             'fac': fac,
@@ -318,7 +342,8 @@ def index(request):
             'aq': aq,
             'resp': resp,
             'county': queryset,
-            'org': org
+            'org': org,
+            'data': data1
         }
         return render(request, 'survey/dashboard.html', context)
     elif user.access_level.id == 2:
@@ -785,7 +810,8 @@ def partner_chart(request):
         #get percentages
         for o in out:
             try:
-                o['perc'] = (o['unverified'] - o['c']) * 100/o['unverified']
+                o['perc'] = round((o['unverified'] - o['c']) * 100/o['unverified'] ,2)
+                o['pending'] = o['unverified'] - o['c']
                 data1.append(o)
             except:
                 pass
