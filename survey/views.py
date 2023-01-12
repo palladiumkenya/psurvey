@@ -307,7 +307,8 @@ def index(request):
         elif is_active == 'inactive':
             quest = Questionnaire.objects.filter(is_active=False).values_list('id', flat=True)
         aq = Questionnaire.objects.filter(is_active=True, active_till__gte=date.today())
-        resp = End_Questionnaire.objects.filter()
+        # resp = End_Questionnaire.objects.filter()
+        resp = ResponsesFlat.objects.filter()
         queryset = Facility.objects.all().distinct('county')
         org = Partner.objects.all().order_by('name')
         context = {
@@ -332,7 +333,8 @@ def index(request):
                                                     questionnaire__active_till__gte=date.today()
                                                 ).values_list('questionnaire').distinct()
 
-        resp = End_Questionnaire.objects.filter(questionnaire__in=quest)
+        # resp = End_Questionnaire.objects.filter(questionnaire__in=quest)
+        resp = ResponsesFlat.objects.filter()
         context = {
             'u': user,
             'fac': fac,
@@ -416,7 +418,7 @@ def dashmetrics(request):
             created_at__gte=start,
             created_at__lte=end).values_list('session_id')
         st = Started_Questionnaire.objects.filter(id__in=act_resp,started_by__facility__in=fac, questionnaire__in=quest)
-        resp = End_Questionnaire.objects.filter(session__in=st, questionnaire__in=quest)
+        resp = ResponsesFlat.objects.filter()
 
     elif user.access_level.id == 2:
         fac = Facility.objects.filter(id__in=Partner_Facility.objects.filter(
