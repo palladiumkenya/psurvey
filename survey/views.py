@@ -299,7 +299,7 @@ def index(request):
     user = request.user
     is_active = request.POST.get('active')
 
-    if user.access_level.id == 3:
+    if user.access_level.id == 2 or user.access_level.id == 3:
         fac = Facility.objects.all().order_by('county', 'sub_county', 'name')
         quest = Questionnaire.objects.filter(is_active=True).order_by('name')
         if is_active == 'active':
