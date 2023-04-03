@@ -4,6 +4,7 @@ from datetime import date
 from itertools import chain
 
 # from dateutil.relativedelta import relativedelta
+import time
 import requests
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
@@ -12,6 +13,7 @@ from django.core.serializers import serialize
 from django.db import transaction, IntegrityError
 from django.db.models import Count, F
 from django.db.models.functions import Cast, TruncMonth
+from django.db import connection
 from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render, redirect
 from docutils.nodes import status
@@ -862,18 +864,19 @@ def new_questionnaire(request):
         isActive = request.POST.get('isActive')
         num_questions = request.POST.get('num_questions')
         target_app = request.POST.get('target_app')
+        responses_table_name = request.POST.get('responses_table').replace(" ", "-" ).lower() + time.strftime("-%m%d-%H%M")
 
         if isActive == "inactive":
             isActive = False
         else:
             isActive = True
         trans_one = transaction.savepoint()
-        create_quest = Questionnaire.objects.create(name=name, is_active=isActive, description=desc, active_till=dateTill, created_by=request.user, number_of_questions=num_questions, target_app=target_app)
+        create_quest = Questionnaire.objects.create(name=name, is_active=isActive, description=desc, active_till=dateTill, created_by=request.user, number_of_questions=num_questions, target_app=target_app, responses_table_name=responses_table_name)
         create_quest.save()
         q_id = create_quest.pk
 
         if q_id:
-            try:
+            try:               
                 batch_size = 500
                 objs = (Facility_Questionnaire(facility_id=f, questionnaire_id=q_id) for f in facility)
                 # while True:
@@ -926,6 +929,51 @@ def new_questionnaire(request):
     elif user.access_level.id == 4:
         raise PermissionDenied
 
+@login_required
+def publish_questionnaire(request, q_id):
+    user = request.user
+    u = user
+    error_msg = ''
+
+    if request.method == 'POST':
+        create_quest = Questionnaire.objects.get(id=q_id)
+        #check if the questionaire has questions 
+        questions = Question.objects.filter(questionnaire_id=q_id).order_by('question_order')
+        count = Question.objects.filter(questionnaire_id=q_id).count()
+
+        if count < 1:
+            #return error            
+            return HttpResponse("error")
+        else:
+            create_quest.is_published = True
+            create_quest.save()  
+
+            # create the responses flat table
+            table_name =  create_quest.responses_table_name 
+            columns_str = 'CREATE TABLE IF NOT EXISTS "' + table_name + '" (id serial PRIMARY KEY,survey_id INT,submit_date TIMESTAMP,partner_name VARCHAR(255),county VARCHAR(255),sub_county VARCHAR(255),mfl_code VARCHAR(255),facility_name VARCHAR(255)'           
+
+            for index, obj in enumerate(questions):
+                columns_str += "," + obj.response_col_name + " VARCHAR(255)"
+
+            columns_str +=')'
+
+            with connection.cursor() as cursor:
+                cursor.execute("call sp_create_table('"+columns_str+"')")
+    
+    if user.access_level.id == 3:
+        question = Questionnaire.objects.get(id=q_id)
+        selected = Facility_Questionnaire.objects.filter(questionnaire_id=q_id)
+        facilities = Facility.objects.all().exclude(id__in=selected.values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
+        s = Facility.objects.all().filter(id__in=selected.values_list('facility_id', flat=True))
+
+        context = {
+            'u': u,
+            'fac': facilities,
+            'q': question,
+            'fac_sel': s,
+            'error_msg':error_msg,
+        }
+        return render(request, 'survey/publish_questionnaire.html', context)
 
 @login_required
 def edit_questionnaire(request, q_id):
@@ -1240,6 +1288,7 @@ def add_question(request, q_id):
         q_is_required = request.POST.get('q_is_required')
         q_date_validation = request.POST.get('date_validation')
         q_is_repeatable = request.POST.get('q_is_repeatable')
+        q_response_col_name = request.POST.get('responses_column').replace(" ", "_" )
         
         parent_response = request.POST.get('parent_response')
         parent_question = request.POST.get('parent_question')
@@ -1262,7 +1311,8 @@ def add_question(request, q_id):
         q_save = Question.objects.create(question=question, question_type=q_type, created_by=user,
                                             questionnaire_id=q_id, question_order=question_order,is_required=q_is_required,
                                             date_validation = q_date_validation,
-                                            is_repeatable = q_is_repeatable)
+                                            is_repeatable = q_is_repeatable,
+                                            response_col_name = q_response_col_name)
         
         question_id = q_save.pk
 
@@ -1312,6 +1362,7 @@ def edit_question(request, q_id):
     try:
         q = Question.objects.get(id=q_id)
         quest_id = Questionnaire.objects.get(id=q.questionnaire_id).id
+        quest_is_published = Questionnaire.objects.get(id=q.questionnaire_id).is_published
         ans = Answer.objects.filter(question=q).values_list('option', flat=True)
         a = ','.join([str(elem) for elem in ans])
         print(a)
@@ -1335,6 +1386,7 @@ def edit_question(request, q_id):
         q_is_required = request.POST.get('q_is_required')
         q_date_validation = request.POST.get('date_validation')
         q_is_repeatable = request.POST.get('q_is_repeatable')
+        q_response_col_name = request.POST.get('responses_column').replace(" ", "_" )
 
         if q_date_validation == '':
             q_date_validation = None
@@ -1358,6 +1410,7 @@ def edit_question(request, q_id):
         q.is_required = q_is_required
         q.date_validation = q_date_validation
         q.is_repeatable = q_is_repeatable
+        q.response_col_name = q_response_col_name
 
         q.save()
 
@@ -1387,6 +1440,7 @@ def edit_question(request, q_id):
         'u': user,
         'q': q,
         'questionnaire': quest_id,
+        'quest_is_published': quest_is_published,
         'question_order': question_number,
         'question_dependance': question_dependance,
         'question_dependance_exists': question_dependance.exists(),
