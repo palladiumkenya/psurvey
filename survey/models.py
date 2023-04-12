@@ -13,6 +13,8 @@ class Questionnaire (models.Model):
     number_of_questions = models.IntegerField(default=1)
     active_till = models.DateField(default=datetime.now)
     target_app = models.CharField(max_length=45)
+    responses_table_name = models.CharField(max_length=255)
+    is_published = models.BooleanField(default=False)
 
     class Meta:
         db_table = "Questionnaires"
@@ -26,6 +28,7 @@ class Question (models.Model):
     is_required = models.BooleanField(default=False)
     date_validation = models.CharField(max_length=20,default=None)
     is_repeatable = models.BooleanField(default=False)
+    response_col_name = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(Users, on_delete=models.CASCADE)
 

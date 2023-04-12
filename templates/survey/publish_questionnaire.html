@@ -1,6 +1,6 @@
 {% extends 'survey/base.html' %}
 {% block title %}
-    New Questionnaire
+    Edit Questionnaire
 {% endblock %}
 {% block headscript %}
     <link href="https://unpkg.com/multiple-select@1.5.2/dist/multiple-select.min.css" rel="stylesheet">
@@ -10,14 +10,14 @@
 {% endblock %}
 {% block breadcrumb %}
 
-    <h6 class="h4 text-white d-inline-block mb-0">New Questionnaire</h6>
+    <h6 class="h4 text-white d-inline-block mb-0">Publish questionnaire</h6>
     <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
         <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
             <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i></a></li>
-            <li class="breadcrumb-item"><a href="{% url 'questionnaires' %}"><small>questionnaires</small></a></li>
-            <li class="breadcrumb-item"><a href="{% url 'new-questionnaires' %}"><small>new questionnaire</small></a>
+            <li class="breadcrumb-item"><a href="{% url 'questionnaires' %}"><small>Questionnaires</small></a></li>
+            <li class="breadcrumb-item"><a href="{% url 'new-questionnaires' %}"><small>Publish questionnaire</small></a>
             </li>
-            <li class="breadcrumb-item active" aria-current="page"><small>new questionnaire</small></li>
+            <li class="breadcrumb-item active" aria-current="page"><small>Publish questionnaire</small></li>
         </ol>
     </nav>
 {% endblock %}
@@ -35,51 +35,57 @@
             <div class="card">
                 <!-- Card header -->
                 <div class="card-header border-0">
-                    <h3 class="mb-0">New Questionnaire</h3>
+                    <h3 class="mb-0">Publish Questionnaire</h3>
+
+                    {% if error_msg  %}
+                        <ul class="messages">
+                          
+                            <li>{{ error_msg }}</li>
+                           
+                        </ul>
+                    {% endif %}
                 </div>
                 <div class="card-body">
-                    <form class="form-group" id="questForm" method="post" action="{% url 'new-questionnaires' %}">
+                    <form class="form-group" id="questForm" method="post"
+                          action="{% url 'publish-questionnaires' q_id=q.id %}">
                         {% csrf_token %}
-                        <h6 class="heading-small text-muted mb-4">Questionnaire information</h6>
+                        <h6 class="heading-small text-muted mb-4">Questionnaire Information</h6>
                         <div class="pl-lg-4">
                             <div class="row">
-                                <div class="col-lg-6">
+                                <div class="col-lg-12">
                                     <div class="form-group">
                                         <label class="form-control-label" for="title">Title</label>
-                                        <input type="text" id="title" name="title" class="form-control" placeholder="Title" required>
+                                        <input disabled type="text" id="title" name="title" class="form-control"
+                                               placeholder="Title" value="{{ q.name }}" required>
                                     </div>
                                 </div>
-                                <div class="col-lg-6">
-                                    <div class="form-group">
-
-                                        <label class="form-control-label" for="facility">Target Facility</label>
-                                        <div>
-                                            <select class="form-control" data-live-search="true" multiple
-                                                    name="facility" id="facility" placeholder="Facilities" required>
-                                                {% for foo in fac %}
-                                                    <option value="{{ foo.id }}">{{ foo.name }}
-                                                        | {{ foo.county }} | {{ foo.sub_county }}</option>
-                                                {% endfor %}
-                                            </select>
-                                        </div>
-                                    </div>
-                                </div>
+                              
                             </div>
                             <div class="row">
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label class="form-control-label" for="isActive">Status</label>
-                                        <select class="form-control" id="isActive" name="isActive" required>
-                                            <option class="custom-control-label" value="active">Active</option>
-                                            <option class="custom-control-label" value="inactive">Inactive</option>
+                                        <select disabled class="form-control" id="isActive" name="isActive" required>
+                                            {% if q.is_active %}
+                                                <option class="custom-control-label" value="active"
+                                                        selected="selected">Active
+                                                </option>
+                                                <option class="custom-control-label" value="inactive">Inactive
+                                                </option>
+                                            {% else %}
+                                                <option class="custom-control-label" value="active">Active</option>
+                                                <option class="custom-control-label" value="inactive"
+                                                        selected="selected">Inactive
+                                                </option>
+                                            {% endif %}
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label for="date-till" class="form-control-label">Active Till Date</label>
-                                        <input class="form-control" type="date" id="date-till" name="date-till"
-                                               required>
+                                        <input disabled class="form-control" type="date" id="date-till" name="date-till"
+                                               value="{{ q.active_till|date:"yy-m-d" }}" required>
                                     </div>
                                 </div>
                             </div>
@@ -87,37 +93,35 @@
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label class="form-control-label" for="isActive">Number of Questions</label>
-                                        <input class="form-control" type="number" name="num_questions" min="1" required placeholder="Number of Questions">
+                                        <input disabled class="form-control" type="number" name="num_questions" min="1" required placeholder="Number of Questions" value="{{ q.number_of_questions }}">
                                     </div>
                                 </div>
+
                                 <div class="col-lg-6">
                                     <div class="form-group">
                                         <label class="form-control-label" for="target_app">Target App</label>
-                                        <select class="form-control" name="target_app" id="target_app" required>
-                                            <option value="" disabled selected hidden>Choose One...</option>
-                                            <option value="Facility">PSurvey</option>
-                                            <option value="Patient">Nishauri</option>
+                                        <select disabled class="form-control" name="target_app" id="target_app" required>
+                                            
+                                            {% if q.target_app == 'Facility' %}
+                                                <option value="Facility" selected>PSurvey</option>
+                                                <option value="Patient">Nishauri</option>
+                                            {% elif q.target_app == 'Patient' %}
+                                                <option value="Facility">PSurvey</option>
+                                                <option value="Patient" selected>Nishauri</option>
+                                            {% endif %}
                                         </select>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="row">                                
-                                <div class="col-lg-6">
-                                    <div class="form-group">
-                                        <label class="form-control-label" for="responses_table">Survey Keyword Tags</label>
-                                        <input type="text" id="responses_table" name="responses_table" class="form-control" placeholder="e.g. weight loss" required pattern=".{4,30}" title="Should be between 4 to 30 chars">
                                     </div>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="form-control-label" for="description">Description</label>
-                                <textarea class="form-control" id="description" name="description" rows="3"
-                                          required></textarea>
+                                <textarea disabled class="form-control" id="description" name="description" rows="3"
+                                          required>{{ q.description }}</textarea>
                             </div>
                         </div>
                         <hr class="my-4"/>
-                        <button type="submit" class="btn btn-success">Save</button>
-                        <a href="{% url 'questionnaires' %}" type="button" class="btn btn-danger">Cancel</a>
+                        <button type="submit" class="btn btn-success">Publish</button>
+                        <a href="{% url 'questionnaires' %}" type="menu" class="btn btn-danger">Cancel</a>
 
 
                     </form>
@@ -136,24 +140,14 @@
 
     <script>
         document.getElementById('date-till').min = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split("T")[0];
-        document.getElementById('date-till').value = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().split("T")[0];
-        // document.getElementById('facility').selectpicker();
     </script>
     <script>
         var qForm = $("#questForm");
-        // qForm.addEventListener('submit', CheckData);
         $(document).ready(function (e) {
             $('#facility').multipleSelect({
                 multiple: true,
                 multipleWidth: 400,
                 filter: true,
-                filterPlaceholder: 'Search',
-            })
-            $('#county_filt').multipleSelect({
-                multiple: true,
-                multipleWidth: 400,
-                filter: true,
-                filterPlaceholder: 'Search',
             })
 
             qForm.submit(function (e) {
@@ -177,10 +171,10 @@
                     data: formData,
                     success: function (data) {
                         if (data == "error") {
-                            console.log(qForm[0])
+                           // console.log(qForm[0])
                             Swal.fire({
-                                title: 'Enter all Data Entry!!',
-                                text: 'ID already exisits',
+                                title: 'Publish cancelled!',
+                                text: 'The questionnaire does not have questions. Add questions to proceed.',
                                 icon: 'error'
                             });
                         } else {
@@ -190,7 +184,7 @@
                                 text: 'Questionnaire Details Saved',
                                 icon: 'success'
                             });
-                            qForm[0].reset();
+                            location.reload();
                         }
                     },
                     error: function (er) {
