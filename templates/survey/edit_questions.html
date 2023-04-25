@@ -152,7 +152,7 @@
                                     <div class="form-group">
                                         <label class="form-control-label" for="question">Data Dictionary Name</label>
                                         <input type="text" id="responses_column" name="responses_column" value="{{ q.response_col_name }}" class="form-control"
-                                               placeholder="e.g. client_name" required pattern=".{4,30}" title="The column name should be between 5 to 30 chars"
+                                               placeholder="e.g. client_name" required pattern=".{2,50}" title="The column name should be between 2 to 50 chars"
                                                {% if quest_is_published == True %}
                                                 disabled
                                                {% endif %}
