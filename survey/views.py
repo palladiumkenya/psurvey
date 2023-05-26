@@ -865,7 +865,7 @@ def new_questionnaire(request):
         isActive = request.POST.get('isActive')
         num_questions = request.POST.get('num_questions')
         target_app = request.POST.get('target_app')
-        responses_table_name = request.POST.get('responses_table').lower().replace(" ", "_" ).lower() + time.strftime("%m%d%H%M").lstrip(digits)
+        responses_table_name = request.POST.get('responses_table').lower().replace(" ", "_" ).replace(",", "_" ).lower() + time.strftime("%m%d%H%M").lstrip(digits)
 
         if isActive == "inactive":
             isActive = False
@@ -1387,7 +1387,7 @@ def edit_question(request, q_id):
         q_is_required = request.POST.get('q_is_required')
         q_date_validation = request.POST.get('date_validation')
         q_is_repeatable = request.POST.get('q_is_repeatable')
-        q_response_col_name = request.POST.get('responses_column').lower().replace(" ", "_" ).lstrip(digits)
+        q_response_col_name = request.POST.get('responses_column').lower().replace(" ", "_" ).replace(",", "_" ).lstrip(digits)
 
         if q_date_validation == '':
             q_date_validation = None
