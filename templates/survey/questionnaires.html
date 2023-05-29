@@ -305,9 +305,11 @@
                                                                 Questionnaire Response Summary</a>
                                                 {% endif %}
 
-                                                {% if not foo.is_published and u.access_level.id == 3 or u.access_level.id == 2 %}
-                                                    <a class="dropdown-item" href="{% url 'publish-questionnaires' q_id=foo.id %}">
+                                                {% if not foo.is_published %}
+													{% if u.access_level.id == 2 or u.access_level.id == 3 %}
+														<a class="dropdown-item" href="{% url 'publish-questionnaires' q_id=foo.id %}">
                                                     Publish Questionnaire</a>
+													{% endif %}
                                                 {% endif %}
 
                                             </div>
