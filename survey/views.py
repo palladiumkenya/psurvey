@@ -28,6 +28,7 @@ from survey.bulk_manager import BulkCreateManager
 from .models import *
 from .serializer import *
 from authApp.serializer import *
+from string import digits
 
 
 # api
@@ -864,7 +865,7 @@ def new_questionnaire(request):
         isActive = request.POST.get('isActive')
         num_questions = request.POST.get('num_questions')
         target_app = request.POST.get('target_app')
-        responses_table_name = request.POST.get('responses_table').replace(" ", "-" ).lower() + time.strftime("-%m%d-%H%M")
+        responses_table_name = request.POST.get('responses_table').lower().replace(" ", "_" ).replace(",", "_" ).lower() + time.strftime("%m%d%H%M").lstrip(digits)
 
         if isActive == "inactive":
             isActive = False
@@ -950,7 +951,7 @@ def publish_questionnaire(request, q_id):
 
             # create the responses flat table
             table_name =  create_quest.responses_table_name 
-            columns_str = 'CREATE TABLE IF NOT EXISTS "' + table_name + '" (id serial PRIMARY KEY,survey_id INT,submit_date TIMESTAMP,partner_name VARCHAR(255),county VARCHAR(255),sub_county VARCHAR(255),mfl_code VARCHAR(255),facility_name VARCHAR(255)'           
+            columns_str = 'CREATE TABLE IF NOT EXISTS "' + table_name + '" (id serial PRIMARY KEY,survey_id INT,submit_date TIMESTAMP,submitted_by VARCHAR(255),partner_name VARCHAR(255),county VARCHAR(255),sub_county VARCHAR(255),mfl_code VARCHAR(255),facility_name VARCHAR(255)'           
 
             for index, obj in enumerate(questions):
                 columns_str += "," + obj.response_col_name + " VARCHAR(255)"
@@ -1288,7 +1289,7 @@ def add_question(request, q_id):
         q_is_required = request.POST.get('q_is_required')
         q_date_validation = request.POST.get('date_validation')
         q_is_repeatable = request.POST.get('q_is_repeatable')
-        q_response_col_name = request.POST.get('responses_column').replace(" ", "_" )
+        q_response_col_name = request.POST.get('responses_column').lower().replace(" ", "_" ).lstrip(digits)
         
         parent_response = request.POST.get('parent_response')
         parent_question = request.POST.get('parent_question')
@@ -1386,7 +1387,7 @@ def edit_question(request, q_id):
         q_is_required = request.POST.get('q_is_required')
         q_date_validation = request.POST.get('date_validation')
         q_is_repeatable = request.POST.get('q_is_repeatable')
-        q_response_col_name = request.POST.get('responses_column').replace(" ", "_" )
+        q_response_col_name = request.POST.get('responses_column').lower().replace(" ", "_" ).replace(",", "_" ).lstrip(digits)
 
         if q_date_validation == '':
             q_date_validation = None
