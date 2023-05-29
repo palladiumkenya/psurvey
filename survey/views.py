@@ -961,7 +961,7 @@ def publish_questionnaire(request, q_id):
             with connection.cursor() as cursor:
                 cursor.execute("call sp_create_table('"+columns_str+"')")
     
-    if user.access_level.id == 3:
+    if user.access_level.id == 2 or user.access_level.id == 3:
         question = Questionnaire.objects.get(id=q_id)
         selected = Facility_Questionnaire.objects.filter(questionnaire_id=q_id)
         facilities = Facility.objects.all().exclude(id__in=selected.values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
