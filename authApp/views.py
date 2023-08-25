@@ -62,6 +62,22 @@ def designation(request):
 
 
 # Web
+def forgot_password(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        msisdn = request.POST.get('msisdn')
+        password = request.POST.get('password ')
+        user_rec = Users.objects.filter(email=email,msisdn=msisdn)
+        if user_rec.exists():
+            user=user_rec[0]
+            user.set_password(password)
+            user.save()      
+            return HttpResponse("success")
+        else:
+            return HttpResponse("invalid details")
+    else:
+        return render(request, "authApp/forgot_password.html")
+
 def web_login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
