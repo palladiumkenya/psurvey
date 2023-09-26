@@ -23,8 +23,7 @@
             <div class="row">
                 <div class="col">
                     <h5 class="card-title text-uppercase text-muted mb-0">Total Responses</h5>
-                    <span class="h2 font-weight-bold mb-0">{{ aq.count }}</span>
-                    <div class="counter h2 font-weight-bold mb-0" data-target="{{ items }}">0</div>
+                    <div class="counter h2 font-weight-bold mb-0" data-target="{{ survey_count }}">0</div>
                 </div>
                 <div class="col-auto">
                     <div class="icon icon-shape bg-gradient-green text-white rounded-circle shadow">
@@ -45,26 +44,16 @@
                 <div class="card-header bg-transparent">
                     <div class="row align-items-center">
                         <div class="col">
-                            <h6 class="text-uppercase text-muted ls-1 mb-1">Performance</h6>
-                            <h5 class="h3 mb-0">Total responses for questionnaire</h5>
-                            <p class="text-center">Questionnaire Title: {{ quest.name }}</p>
+                            <h5 class="h3 mb-0">Questionnaire : {{ quest.name }}</h5>
                         </div>
                     </div>
                 </div>
                 <div class="mt-4">
-                    <h3 class="text-center">Responses List</h3>
+                    <h3 class="text-center">Survey Responses</h3>
                     <div class="table-responsive">
                         <!-- Projects table -->
-                        <table id="albums" class="table table-striped table-bordered" style="width:100%"
-                               data-server-side="true" data-ajax="/api/questionnaire/{{ quest.id }}/?format=datatables">
-                            <thead class="thead-light">
-                            <tr>
-                                <th data-data="question.question_order">Question_No</th>
-                                <th data-data="question.question">Question</th>
-                                <th data-data="answer.option" data-name="answer.option">Answer</th>
-                                <th data-data="open_text">Description</th>
-                            </tr>
-                            </thead>
+                        <table id="survey_data" class="display table table-striped table-bordered" style="width:100%">
+                           
                         </table>
                     </div>
 
@@ -86,8 +75,38 @@
     <script src="https://cdn.datatables.net/buttons/2.2.2/js/buttons.html5.min.js"></script>
     <script>
         $(document).ready(function () {
+            LoadETLData();
+        });
+        $.fn.dataTable.ext.errMode = 'throw';
+
+        function LoadETLData()
+        {
+            var columnKeys = ""
+            // Get the survey data
+            var etl_data =  JSON.parse('{{ etl_data | escapejs }}');
             
-            $('#albums').DataTable({
+            // Get the keys (column names) of the first object in the JSON data   
+            let cols = Object.keys(etl_data[0]);         
+            var columns = [];
+            cols.forEach((col) => {
+                var obj = { title: col };
+                columns.push(obj);
+            });
+            
+            // Loop through the values and create table cells
+            var mydata = [];
+            $.each(etl_data, (i, obj) => {
+                var row_data = []
+                $.each(obj, (x, elem) => {
+                    row_data.push(elem);
+                });
+                mydata.push(row_data);
+            });
+            // console.log(mydata)
+            
+            $('#survey_data').DataTable({
+                columns: columns,
+                data: mydata,
                 lengthMenu: [[25, 100, -1], [25, 100, "All"]],
                 pageLength: 25,
                 dom: 'Blfrtip',
@@ -104,8 +123,7 @@
                     }
                 ]
             });
-        });
-        $.fn.dataTable.ext.errMode = 'throw';
+        }
     </script>
     <script>
         const counters = document.querySelectorAll('.counter');

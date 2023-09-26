@@ -23,22 +23,22 @@ class Questionnaire (models.Model):
 
 class Question (models.Model):
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
-    question =  models.CharField(max_length=500)
+    question = models.CharField(max_length=500)
     question_type = models.IntegerField()
     question_order = models.IntegerField(default=1)
     is_required = models.BooleanField(default=False)
-    date_validation = models.CharField(max_length=20,default=None)
+    date_validation = models.CharField(max_length=20, default=None)
     is_repeatable = models.BooleanField(default=False)
     response_col_name = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(Users, on_delete=models.CASCADE)
 
-
     class Meta:
         db_table = "Questions"
 
+
 class Answer (models.Model):
-    question= models.ForeignKey(Question, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
     option = models.CharField(max_length=455)
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(Users, on_delete=models.CASCADE, default=1)
@@ -49,11 +49,12 @@ class Answer (models.Model):
 
 class QuestionDependance (models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    answer = models.ForeignKey(Answer, on_delete=models.CASCADE, related_name='response_id')
-
+    answer = models.ForeignKey(
+        Answer, on_delete=models.CASCADE, related_name='response_id')
 
     class Meta:
         db_table = "QuestionDependance"
+
 
 class Questionnaire_Participants (models.Model):
     participant = models.CharField(max_length=100)
@@ -63,12 +64,15 @@ class Questionnaire_Participants (models.Model):
     class Meta:
         db_table = "Questionnaire_Participants"
 
+
 class Started_Questionnaire (models.Model):
     ccc_number = models.CharField(max_length=15, null=True)
     firstname = models.CharField(max_length=300, null=True)
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
-    questionnaire_participant = models.ForeignKey(Questionnaire_Participants, on_delete=models.CASCADE)
+    questionnaire_participant = models.ForeignKey(
+        Questionnaire_Participants, on_delete=models.CASCADE)
     started_by = models.ForeignKey(Users, on_delete=models.CASCADE, default=1)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         db_table = "Started_Questionnaire"
@@ -78,7 +82,8 @@ class Response (models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     answer = models.ForeignKey(Answer, on_delete=models.CASCADE, null=True)
     open_text = models.CharField(max_length=150, blank=True, null=True)
-    session = models.ForeignKey(Started_Questionnaire, on_delete=models.CASCADE, default=1)
+    session = models.ForeignKey(
+        Started_Questionnaire, on_delete=models.CASCADE, default=1)
     created_at = models.DateField(auto_now_add=True)
 
     class Meta:
@@ -97,8 +102,10 @@ class Patient_Consent(models.Model):
 
 
 class End_Questionnaire (models.Model):
-    session = models.OneToOneField(Started_Questionnaire, on_delete=models.CASCADE, default=1)
-    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE, default=1)
+    session = models.OneToOneField(
+        Started_Questionnaire, on_delete=models.CASCADE, default=1)
+    questionnaire = models.ForeignKey(
+        Questionnaire, on_delete=models.CASCADE, default=1)
 
     class Meta:
         db_table = "End_Questionnaire"
@@ -161,4 +168,5 @@ class ResponsesFlat(models.Model):
     class Meta:
         managed = False
         db_table = "vw_questionnaire_responses_flat_table"
-        unique_together = ('survey_id', 'ccc_no', 'other_non_verification_reason', 'date_of_last_vl', 'art_start_date', 'gender')
+        unique_together = ('survey_id', 'ccc_no', 'other_non_verification_reason',
+                           'date_of_last_vl', 'art_start_date', 'gender')
