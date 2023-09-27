@@ -5,6 +5,7 @@ from django.contrib.auth.models import Permission
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
 from django.db import transaction
+from django.db import connection
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -59,15 +60,52 @@ def designation(request):
         return Res({"data": serializer.data}, status=status.HTTP_200_OK)
 
 
-
-
 # Web
+def forgot_password(request):
+    if request.method == 'POST':
+        email = request.POST.get('email')
+        msisdn = request.POST.get('msisdn')
+        password = request.POST.get('password')
+        user_rec = Users.objects.filter(email=email, msisdn=msisdn)
+        if user_rec.exists():
+            trans_one = transaction.savepoint()
+            user = user_rec[0]
+            try:
+                # create the user with the changed password
+                msisdn_ = f"{msisdn}_"
+                email_ = f"{email}_"
+                new_user = Users.objects.create_user(
+                    msisdn=msisdn_, password=password, email=email_)
+
+                # upate the user record with the new password
+                user.password = new_user.password
+                user.save()
+
+                # delete the new user record
+                with connection.cursor() as cursor:
+                    cursor.execute(
+                        "DELETE FROM \"User\" WHERE id = %s ", [new_user.id])
+
+                return HttpResponse("success")
+            except IntegrityError:
+                transaction.savepoint_rollback(trans_one)
+                return HttpResponse("error")
+            except Exception:
+                transaction.savepoint_rollback(trans_one)
+                return HttpResponse("error")
+        else:
+            return HttpResponse("invalid details")
+    else:
+        return render(request, "authApp/forgot_password.html")
+
+
 def web_login(request):
     if request.method == 'POST':
         form = LoginForm(request.POST)
         if form.is_valid():
             clean = form.cleaned_data
-            user = authenticate(username=clean['msisdn'], password=clean['password'])
+            user = authenticate(
+                username=clean['msisdn'], password=clean['password'])
             print(user)
             if user is not None:
                 if user.is_active:
@@ -150,7 +188,8 @@ def facility_partner_link(request):
     if user.access_level.id != 3:
         raise PermissionDenied
     par_fac = Partner_Facility.objects.all()
-    facilities = Facility.objects.all().exclude(id__in=par_fac.values_list('facility_id', flat=True))
+    facilities = Facility.objects.all().exclude(
+        id__in=par_fac.values_list('facility_id', flat=True))
 
     if request.method == 'POST':
         fac = request.POST.getlist('facility')
@@ -160,10 +199,11 @@ def facility_partner_link(request):
         try:
             create_part = Partner.objects.create(name=partner, created_by=user)
             create_part.save()
-            
+
             bulk_mgr = BulkCreateManager(chunk_size=2000)
             for i in fac:
-                bulk_mgr.add(Partner_Facility(facility_id=i, partner_id=create_part.pk))
+                bulk_mgr.add(Partner_Facility(
+                    facility_id=i, partner_id=create_part.pk))
             bulk_mgr.done()
             # for i in fac:
             #     p_user = Partner_Facility.objects.create(facility_id=i, partner_id=create_part.pk)
@@ -174,7 +214,6 @@ def facility_partner_link(request):
         except Exception:
             transaction.savepoint_rollback(trans_one)
             return HttpResponse("error")
-            
 
     partner_users = Partner.objects.all()
     context = {
@@ -193,7 +232,8 @@ def register_partner(request):
     if request.user.access_level.id == 3:
         facilities = Facility.objects.filter().order_by('county', 'sub_county', 'name')
     else:
-        facilities = Facility.objects.exclude(id__in=Partner_Facility.objects.values_list('facility_id', flat=True)).order_by('county', 'sub_county', 'name')
+        facilities = Facility.objects.exclude(id__in=Partner_Facility.objects.values_list(
+            'facility_id', flat=True)).order_by('county', 'sub_county', 'name')
     if request.method == 'POST':
         trans_one = transaction.savepoint()
         f_name = request.POST.get('f_name')
@@ -205,14 +245,16 @@ def register_partner(request):
         partner = request.POST.get('partner-user')
         if password != re_password:
             return HttpResponse("Password error")
-        user = Users.objects.create_user(msisdn=msisdn, password=password, email=email)
+        user = Users.objects.create_user(
+            msisdn=msisdn, password=password, email=email)
         user.f_name = f_name
         user.l_name = l_name
         user.access_level_id = 2
         user.save()
         try:
             if user.pk:
-                admin = Partner_User.objects.create(name_id=partner, user=user, created_by=u)
+                admin = Partner_User.objects.create(
+                    name_id=partner, user=user, created_by=u)
                 admin.save()
         except IntegrityError:
             transaction.savepoint_rollback(trans_one)
@@ -250,14 +292,16 @@ def register_partner_user(request):
         if password != re_password:
             return HttpResponse("Password error")
         print(partner)
-        user = Users.objects.create_user(msisdn=msisdn, password=password, email=email)
+        user = Users.objects.create_user(
+            msisdn=msisdn, password=password, email=email)
         user.f_name = f_name
         user.l_name = l_name
         user.access_level_id = 5
         print(user.id)
         user.save()
         try:
-            admin = Partner_User.objects.create(name=Partner_User.objects.get(user=u).name, user=user, created_by=u)
+            admin = Partner_User.objects.create(
+                name=Partner_User.objects.get(user=u).name, user=user, created_by=u)
             admin.save()
             for par in partner:
                 user.user_permissions.add(Permission.objects.get(id=par))
@@ -266,7 +310,8 @@ def register_partner_user(request):
             transaction.savepoint_rollback(trans_one)
             return HttpResponse("error")
 
-    partner_users = Partner_User.objects.filter(name=Partner_User.objects.get(user=u).name, user__access_level__id=5)
+    partner_users = Partner_User.objects.filter(
+        name=Partner_User.objects.get(user=u).name, user__access_level__id=5)
     perm = Permission.objects.filter(Q(name__contains='Can add questionnaire') |
                                      Q(name__contains='Can change questionnaire') |
                                      Q(name__contains='Can delete questionnaire') |
@@ -274,8 +319,8 @@ def register_partner_user(request):
                                      Q(name__exact='Can add partner') |
                                      Q(name__exact='Can change partner') |
                                      Q(name__exact='Can delete partner') |
-                                     Q(name__exact='Can view partner') )
-                                     # | Q(name__contains=''))
+                                     Q(name__exact='Can view partner'))
+    # | Q(name__contains=''))
 
     context = {
         'u': u,
@@ -302,11 +347,12 @@ def register_fac_admin(request):
         re_password = request.POST.get('re_password')
         if password != re_password:
             return HttpResponse("Password error")
-        user = Users.objects.create_user(msisdn=msisdn, password=password, email=email)
+        user = Users.objects.create_user(
+            msisdn=msisdn, password=password, email=email)
         user.f_name = f_name
         user.l_name = l_name
         user.access_level_id = 4
-        user.facility_id=facility
+        user.facility_id = facility
         print(user.id)
         user.save()
 
@@ -324,7 +370,8 @@ def edit_partner(request, p_id):
         raise PermissionDenied
     part = Partner.objects.get(id=p_id)
     par_fac = Partner_Facility.objects.all()
-    facilities = Facility.objects.all().exclude(id__in=par_fac.values_list('facility_id', flat=True))
+    facilities = Facility.objects.all().exclude(
+        id__in=par_fac.values_list('facility_id', flat=True))
     selected = Facility.objects.filter(
         id__in=Partner_Facility.objects.filter(partner=part).values_list('facility_id', flat=True))
 
@@ -339,7 +386,8 @@ def edit_partner(request, p_id):
             fac_init = Partner_Facility.objects.filter(partner=part)
             fac_init.delete()
             for i in fac:
-                p_user = Partner_Facility.objects.create(facility_id=i, created_by=user, partner_id=part.pk)
+                p_user = Partner_Facility.objects.create(
+                    facility_id=i, created_by=user, partner_id=part.pk)
                 p_user.save()
         except IntegrityError:
             transaction.savepoint_rollback(trans_one)
@@ -360,7 +408,8 @@ def edit_partner(request, p_id):
 def profile(request):
     u = request.user
     if u.access_level.id == 2:
-        partner = Partner.objects.get(id=Partner_User.objects.get(user=u).name_id)
+        partner = Partner.objects.get(
+            id=Partner_User.objects.get(user=u).name_id)
     else:
         partner = 1
     if request.method == "POST":

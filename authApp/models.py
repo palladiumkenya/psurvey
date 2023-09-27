@@ -43,13 +43,16 @@ class Access_Level(models.Model):
 class Users(AbstractBaseUser, PermissionsMixin):
     f_name = models.CharField(max_length=50, unique=False)
     l_name = models.CharField(max_length=50, unique=False)
-    designation = models.ForeignKey(Designation, on_delete=models.CASCADE, null=True, blank=True)
-    facility = models.ForeignKey(Facility, on_delete=models.CASCADE, null=True, blank=True)
+    designation = models.ForeignKey(
+        Designation, on_delete=models.CASCADE, null=True, blank=True)
+    facility = models.ForeignKey(
+        Facility, on_delete=models.CASCADE, null=True, blank=True)
     email = models.EmailField(_('email address'), unique=True)
     msisdn = models.CharField(max_length=15, unique=True)
     is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
-    access_level = models.ForeignKey(Access_Level, on_delete=models.CASCADE, default=1)
+    access_level = models.ForeignKey(
+        Access_Level, on_delete=models.CASCADE, default=1)
 
     date_joined = models.DateTimeField(default=timezone.now)
 
@@ -68,7 +71,8 @@ class Users(AbstractBaseUser, PermissionsMixin):
 class Partner (models.Model):
     name = models.CharField(max_length=50)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='partner_created_by', default=1)
+    created_by = models.ForeignKey(
+        Users, on_delete=models.CASCADE, related_name='partner_created_by', default=1)
     unverified = models.IntegerField()
 
     class Meta:
@@ -79,7 +83,8 @@ class Partner_User (models.Model):
     name = models.ForeignKey(Partner, on_delete=models.CASCADE)
     user = models.OneToOneField(Users, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
-    created_by = models.ForeignKey(Users, on_delete=models.CASCADE, related_name='user_created_by', default=1)
+    created_by = models.ForeignKey(
+        Users, on_delete=models.CASCADE, related_name='user_created_by', default=1)
 
     class Meta:
         db_table = "Partner_User"

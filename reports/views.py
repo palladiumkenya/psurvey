@@ -10,11 +10,14 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from reports.serializer import *
 from survey.models import *
+# from authApp.models import Partner
+
+import json
 
 
 @login_required
-def index (request, q_id):
-    user =  request.user
+def index(request, q_id):
+    user = request.user
     question = Question.objects.get(id=q_id)
     respo = Response.objects.filter(question_id=q_id).order_by('-id')
     page = request.GET.get('page', 1)
@@ -29,7 +32,8 @@ def index (request, q_id):
     labels = []
     data = []
 
-    queryset = Response.objects.filter(question_id=q_id).values('answer__option').annotate(count=Count('answer'))
+    queryset = Response.objects.filter(question_id=q_id).values(
+        'answer__option').annotate(count=Count('answer'))
 
     for city in queryset:
         labels.append(city['answer__option'])
@@ -47,10 +51,11 @@ def index (request, q_id):
 
 
 @login_required
-def questionnaire_report (request, q_id):
-    user =  request.user
+def questionnaire_report(request, q_id):
+    user = request.user
     question = Questionnaire.objects.get(id=q_id)
-    respo = Response.objects.filter(question__questionnaire_id=q_id).order_by('-id')
+    respo = Response.objects.filter(
+        question__questionnaire_id=q_id).order_by('-id')
     page = request.GET.get('page', 1)
     paginator = Paginator(respo, 20)
     try:
@@ -63,7 +68,10 @@ def questionnaire_report (request, q_id):
     labels = []
     data = []
 
-    queryset = Response.objects.filter(question__questionnaire_id=q_id).values('answer__option').annotate(count=Count('answer'))
+    etl_data = populate_etl_table(q_id)
+    survey_count = len(etl_data)
+    queryset = Response.objects.filter(question__questionnaire_id=q_id).values(
+        'answer__option').annotate(count=Count('answer'))
 
     for city in queryset:
         labels.append(city['answer__option'])
@@ -76,11 +84,98 @@ def questionnaire_report (request, q_id):
         'resp': resp,
         'labels': labels,
         'data': data,
+        'etl_data': json.dumps(etl_data),
+        'survey_count': survey_count,
     }
+
+    # return HttpResponse(json.dumps(etl_data))
     return render(request, 'reports/questionnaire_report.html', context)
 
 
-def open_end (request, q_id):
+def populate_etl_table(q_id):
+    try:
+        etl_data = []
+
+        # get the completed surveys for this questionnaire
+        survey_index = 0
+        for survey in Started_Questionnaire.objects.filter(questionnaire_id=q_id):
+            if End_Questionnaire.objects.filter(session=survey).exists():
+                survey_index += 1
+                survey_response = get_etl_table_row(q_id)
+                submittor = Users.objects.get(id=survey.started_by_id)
+                submittor_name = submittor.f_name + " " + submittor.l_name
+                survey_response['survey_id'] = str(survey.id)
+                survey_response['submit_date'] = str(survey.created_at)
+                survey_response['submitted_by'] = submittor_name
+
+                if submittor.facility_id:
+                    faci = Facility.objects.get(id=submittor.facility_id)
+                    partner_faci = Partner_Facility.objects.filter(
+                        facility_id=submittor.facility_id).order_by("id").first()
+                    partner = Partner.objects.get(id=partner_faci.partner_id)
+                    survey_response['partner_name'] = partner.name
+                    survey_response['county'] = faci.county
+                    survey_response['sub_county'] = faci.sub_county
+                    survey_response['mfl_code'] = str(faci.mfl_code)
+                    survey_response['facility_name'] = faci.name
+
+                # get all responses for this survey
+                responses = Response.objects.filter(
+                    session_id=survey.id).order_by("id")
+
+                # generate ETL table data
+                multi_select_responses = {}
+                answer_value = ""
+
+                # survey_len = len(responses)
+                for obj in responses:
+
+                    # get the question response column name for this response
+                    ques = Question.objects.get(id=obj.question_id)
+                    response_col_name = ques.response_col_name
+
+                    # get the answer value for this response
+                    if obj.open_text != '':
+                        answer_value = obj.open_text
+                    else:
+                        answer_value = Answer.objects.get(
+                            id=obj.answer_id).option
+
+                    if ques.question_type != 3:
+                        survey_response[response_col_name] = answer_value
+
+                    else:
+                        if not multi_select_responses.get(response_col_name):
+                            multi_select_responses[response_col_name] = answer_value
+                        else:
+                            multi_select_responses[response_col_name] += "," + \
+                                answer_value
+
+                    for col_name, val_str in multi_select_responses.items():
+                        survey_response[col_name] = val_str
+
+                etl_data.append(survey_response)
+
+        return etl_data
+
+    except Exception as e:
+        print("error", e)
+
+
+def get_etl_table_row(q_id):
+    table_row = dict(
+        [('survey_id', ''), ('submit_date', ''), ('submitted_by', ''), ('partner_name', ''), ('county', ''), ('sub_county', ''), ('mfl_code', ''), ('facility_name', '')])
+
+    questions = Question.objects.filter(
+        questionnaire_id=q_id).order_by('question_order')
+
+    for obj in questions:
+        table_row[obj.response_col_name] = ''
+
+    return table_row
+
+
+def open_end(request, q_id):
     keywords = request.POST.get('keywords')
     print(keywords)
     words = keywords.replace(' ', '').split(',')
@@ -89,7 +184,8 @@ def open_end (request, q_id):
     data = []
     result = []
     for word in words:
-        queryset = Response.objects.filter(question_id=q_id, open_text__icontains=word)
+        queryset = Response.objects.filter(
+            question_id=q_id, open_text__icontains=word)
         result.append({'name': word, 'freq': queryset.count()})
 
     print(result)
@@ -105,7 +201,7 @@ def open_end (request, q_id):
     return JsonResponse(context)
 
 
-def pie_chart (request):
+def pie_chart(request):
     labels = []
     data = []
 
@@ -120,11 +216,11 @@ def pie_chart (request):
     })
 
 
-def users_report (request):
+def users_report(request):
     return render(request, 'reports/user_report.html', {'u': request.user})
 
 
-def patients_report (request):
+def patients_report(request):
     return render(request, 'reports/patient_report.html', {'u': request.user})
 
 
@@ -144,19 +240,20 @@ class Current_user(viewsets.ModelViewSet):
         if user.access_level.id == 4:
             return Users.objects.filter(facility=user.facility, access_level_id=1)
 
-
     def filter_queryset(self, qs):
         search = self.request.GET.get('search[value]', None)
         if search:
-            qs = qs.filter(Q(designation__name__icontains=search) | Q(facility__name__icontains=search))
+            qs = qs.filter(Q(designation__name__icontains=search)
+                           | Q(facility__name__icontains=search))
 
         return qs
 
 
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
-def Patients (request):
-    sq = Started_Questionnaire.objects.filter(started_by__facility=request.user.facility).order_by('ccc_number')
+def Patients(request):
+    sq = Started_Questionnaire.objects.filter(
+        started_by__facility=request.user.facility).order_by('ccc_number')
     print(sq)
     ser = PatientSer(sq, many=True)
 
@@ -167,7 +264,8 @@ def Patients (request):
             not_found = True
             if item['ccc_number'] == month['ccc_number']:
                 not_found = False
-                month['responses'].append({'data': item['responses'], 'session': item['id']})
+                month['responses'].append(
+                    {'data': item['responses'], 'session': item['id']})
 
                 break
         if not_found:
@@ -220,4 +318,3 @@ class QuestionnaireViewSet(viewsets.ModelViewSet):
                     return qs.filter(answer__option__icontains=search)
 
         return qs
-
