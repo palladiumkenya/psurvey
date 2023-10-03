@@ -81,53 +81,59 @@
         $(document).ready(function () {
             LoadETLData();
         });
-        $.fn.dataTable.ext.errMode = 'throw';
+        // $.fn.dataTable.ext.errMode = 'throw';
 
         function LoadETLData()
         {
             var columnKeys = ""
             // Get the survey data
             var etl_data =  JSON.parse('{{ etl_data | escapejs }}');
-            
-            // Get the keys (column names) of the first object in the JSON data   
-            let cols = Object.keys(etl_data[0]);         
-            var columns = [];
-            cols.forEach((col) => {
-                var obj = { title: col };
-                columns.push(obj);
-            });
-            
-            // Loop through the values and create table cells
-            var mydata = [];
-            $.each(etl_data, (i, obj) => {
-                var row_data = []
-                $.each(obj, (x, elem) => {
-                    row_data.push(elem);
-                });
-                mydata.push(row_data);
-            });
-            // console.log(mydata)
+            // console.log(etl_data['data'])
 
-            $('#survey_data').DataTable({
-                columns: columns,
-                data: mydata,
-                lengthMenu: [[25, 100, -1], [25, 100, "All"]],
-                pageLength: 25,
-                dom: 'Blfrtip',
-                buttons: [
-                    {
-                        extend: 'excel',
-                        filename: filename,
-                        text: '<i class="fa fa-file-excel"></i> Excell Export ' ,
-                        exportOptions: {
-                            modifier: {
-                                search: 'applied',
-                                order: 'applied'
+            if(etl_data !== null)
+            {
+                // Get the keys (column names) of the first object in the JSON data   
+                // let cols = Object.keys(etl_data[0]);
+                var columns = [];         
+                var cols = etl_data['column_names'];
+                cols.forEach((col) => {
+                    var obj = { title: col };
+                    columns.push(obj);
+                });
+                
+                // Loop through the values and create table cells            
+                var mydata = [];
+                $.each(etl_data['data'], (i, obj) => {
+                    var row_data = []
+                    $.each(obj, (x, elem) => {
+                        row_data.push(elem);
+                    });
+                    mydata.push(row_data);
+                });
+                // console.log(columns)
+
+                $('#survey_data').DataTable({
+                    columns: columns,
+                    data: mydata,
+                    lengthMenu: [[25, 100, -1], [25, 100, "All"]],
+                    pageLength: 25,
+                    dom: 'Blfrtip',
+                    buttons: [
+                        {
+                            extend: 'excel',
+                            filename: filename,
+                            text: '<i class="fa fa-file-excel"></i> Excell Export ' ,
+                            exportOptions: {
+                                modifier: {
+                                    search: 'applied',
+                                    order: 'applied'
+                                }
                             }
                         }
-                    }
-                ]
-            });
+                    ]
+                });
+
+            }
         }
     </script>
     <script>
