@@ -131,66 +131,66 @@ def populate_etl_table(q_id):
         # generate raw data query for this questionnaire
 
         # get the completed surveys for this questionnaire
-        survey_index = 0
-        for survey in Started_Questionnaire.objects.filter(questionnaire_id=q_id):
-            if End_Questionnaire.objects.filter(session=survey).exists():
-                survey_index += 1
-                survey_response = get_etl_table_row(q_id)
-                submittor = Users.objects.get(id=survey.started_by_id)
-                submittor_name = submittor.f_name + " " + submittor.l_name
-                survey_response['survey_id'] = str(survey.id)
-                survey_response['submit_date'] = str(survey.created_at)
-                survey_response['submitted_by'] = submittor_name
+        # survey_index = 0
+        # for survey in Started_Questionnaire.objects.filter(questionnaire_id=q_id):
+        #     if End_Questionnaire.objects.filter(session=survey).exists():
+        #         survey_index += 1
+        #         survey_response = get_etl_table_row(q_id)
+        #         submittor = Users.objects.get(id=survey.started_by_id)
+        #         submittor_name = submittor.f_name + " " + submittor.l_name
+        #         survey_response['survey_id'] = str(survey.id)
+        #         survey_response['submit_date'] = str(survey.created_at)
+        #         survey_response['submitted_by'] = submittor_name
 
-                if submittor.facility_id:
-                    faci = Facility.objects.get(id=submittor.facility_id)
-                    partner_faci = Partner_Facility.objects.filter(
-                        facility_id=submittor.facility_id).order_by("id").first()
-                    partner = Partner.objects.get(id=partner_faci.partner_id)
-                    survey_response['partner_name'] = partner.name
-                    survey_response['county'] = faci.county
-                    survey_response['sub_county'] = faci.sub_county
-                    survey_response['mfl_code'] = str(faci.mfl_code)
-                    survey_response['facility_name'] = faci.name
+        #         if submittor.facility_id:
+        #             faci = Facility.objects.get(id=submittor.facility_id)
+        #             partner_faci = Partner_Facility.objects.filter(
+        #                 facility_id=submittor.facility_id).order_by("id").first()
+        #             partner = Partner.objects.get(id=partner_faci.partner_id)
+        #             survey_response['partner_name'] = partner.name
+        #             survey_response['county'] = faci.county
+        #             survey_response['sub_county'] = faci.sub_county
+        #             survey_response['mfl_code'] = str(faci.mfl_code)
+        #             survey_response['facility_name'] = faci.name
 
-                # get all responses for this survey
-                responses = Response.objects.filter(
-                    session_id=survey.id).order_by("id")
+        #         # get all responses for this survey
+        #         responses = Response.objects.filter(
+        #             session_id=survey.id).order_by("id")
 
-                # generate ETL table data
-                multi_select_responses = {}
-                answer_value = ""
+        #         # generate ETL table data
+        #         multi_select_responses = {}
+        #         answer_value = ""
 
-                # survey_len = len(responses)
-                for obj in responses:
+        #         # survey_len = len(responses)
+        #         for obj in responses:
 
-                    # get the question response column name for this response
-                    ques = Question.objects.get(id=obj.question_id)
-                    response_col_name = ques.response_col_name
+        #             # get the question response column name for this response
+        #             ques = Question.objects.get(id=obj.question_id)
+        #             response_col_name = ques.response_col_name
 
-                    # get the answer value for this response
-                    if obj.open_text != '':
-                        answer_value = obj.open_text
-                    else:
-                        answer_value = Answer.objects.get(
-                            id=obj.answer_id).option
+        #             # get the answer value for this response
+        #             if obj.open_text != '':
+        #                 answer_value = obj.open_text
+        #             else:
+        #                 answer_value = Answer.objects.get(
+        #                     id=obj.answer_id).option
 
-                    if ques.question_type != 3:
-                        survey_response[response_col_name] = answer_value
+        #             if ques.question_type != 3:
+        #                 survey_response[response_col_name] = answer_value
 
-                    else:
-                        if not multi_select_responses.get(response_col_name):
-                            multi_select_responses[response_col_name] = answer_value
-                        else:
-                            multi_select_responses[response_col_name] += "," + \
-                                answer_value
+        #             else:
+        #                 if not multi_select_responses.get(response_col_name):
+        #                     multi_select_responses[response_col_name] = answer_value
+        #                 else:
+        #                     multi_select_responses[response_col_name] += "," + \
+        #                         answer_value
 
-                    for col_name, val_str in multi_select_responses.items():
-                        survey_response[col_name] = val_str
+        #             for col_name, val_str in multi_select_responses.items():
+        #                 survey_response[col_name] = val_str
 
-                etl_data.append(survey_response)
+        #         etl_data.append(survey_response)
 
-        return etl_data
+        # return etl_data
 
     except Exception as e:
         print("error", e)
