@@ -5,6 +5,7 @@ from rest_framework.response import Response as Res
 from datetime import date
 from django.shortcuts import render
 from django.db.models import Count, Q
+from django.db import connection
 from rest_framework import viewsets, status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
@@ -67,9 +68,11 @@ def questionnaire_report(request, q_id):
 
     labels = []
     data = []
+    etl_data = []
 
     etl_data = populate_etl_table(q_id)
-    survey_count = len(etl_data)
+    survey_count = 0 if etl_data is None else len(etl_data['data'])
+
     queryset = Response.objects.filter(question__questionnaire_id=q_id).values(
         'answer__option').annotate(count=Count('answer'))
 
@@ -85,6 +88,7 @@ def questionnaire_report(request, q_id):
         'labels': labels,
         'data': data,
         'etl_data': json.dumps(etl_data),
+        # 'survey_count': 0,
         'survey_count': survey_count,
     }
 
@@ -95,6 +99,36 @@ def questionnaire_report(request, q_id):
 def populate_etl_table(q_id):
     try:
         etl_data = []
+
+        # get the questions for this survey
+        str_etl_query = ""
+        str_max = "SELECT u.survey_id,TO_CHAR(u.submit_date,'DD/MM/YYYY') as submit_date,u.submitted_by,u.partner_name,u.county,u.sub_county,u.mfl_code,u.master_facility_name,"
+        str_case = " FROM ( SELECT t.survey_id,t.submit_date,t.submitted_by,t.partner_name,t.county,t.sub_county,t.mfl_code,t.master_facility_name,"
+        column_names = ['survey_id', 'submit_date', 'submitted_by', 'partner_name',
+                        'county', 'sub_county', 'mfl_code', 'master_facility_name']
+
+        questions = Question.objects.filter(
+            questionnaire_id=q_id).order_by("question_order")
+
+        for obj in questions:
+            str_case += f"CASE WHEN t.question_order = {obj.question_order} THEN t.response ELSE NULL::character varying END AS {obj.response_col_name}, "
+            str_max += f"max(u.{obj.response_col_name}::text) AS {obj.response_col_name}, "
+            column_names.append(obj.response_col_name)
+            # column_names += "{ title: '" + obj.response_col_name + "' }, "
+
+        core_query = f" FROM ( SELECT DISTINCT z.id AS questionnaire_id,z.name AS questionnaire_name,b.id AS survey_id,p.name AS partner_name,w.mfl_code,w.name AS master_facility_name,w.county,w.sub_county,v.participant,b.ccc_number,e.question_order,e.question,CASE WHEN btrim(d.open_text::text) = ''::text THEN f.option ELSE d.open_text END AS response,y.id AS submitted_by_id,concat(y.f_name, ' ', y.l_name) AS submitted_by,d.created_at AS submit_date FROM  \"Questionnaires\" z JOIN  \"Started_Questionnaire\" b ON z.id = b.questionnaire_id JOIN  \"User\" y ON b.started_by_id = y.id JOIN  \"Facilities\" w ON y.facility_id = w.id JOIN  \"Responses\" d ON b.id = d.session_id JOIN  \"Answers\" f ON d.answer_id = f.id JOIN  \"Questions\" e ON f.question_id = e.id JOIN  \"End_Questionnaire\" h ON b.id = h.session_id JOIN  \"Questionnaire_Participants\" v ON b.questionnaire_participant_id = v.id LEFT JOIN  \"Partner_Facility\" x ON w.id = x.facility_id LEFT JOIN  \"Partner\" p ON x.partner_id = p.id WHERE z.id = {q_id} AND (y.id <> ALL (ARRAY[133, 136, 139, 138, 137, 142, 45, 155, 434])) ORDER BY b.id, e.question_order) t GROUP BY t.survey_id, t.submit_date,t.submitted_by, t.partner_name, t.county, t.sub_county, t.mfl_code, t.master_facility_name, t.question_order, t.response ORDER BY t.survey_id) u GROUP BY u.survey_id, u.submit_date,u.submitted_by, u.partner_name, u.county, u.sub_county, u.mfl_code, u.master_facility_name"
+
+        str_etl_query = str_max[:-2] + str_case[:-2] + core_query
+        # column_names = column_names[:-2] + "]"
+
+        data = None
+        with connection.cursor() as cursor:
+            cursor.execute(str_etl_query)
+            data = cursor.fetchall()
+        return dict([('column_names', column_names), ('data', data)])
+
+        # generate column names
+        # generate raw data query for this questionnaire
 
         # get the completed surveys for this questionnaire
         survey_index = 0
