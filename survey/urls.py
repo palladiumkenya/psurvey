@@ -1,4 +1,4 @@
-from django.conf.urls import url
+# from django.urls import re_path
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.urls import path
 
@@ -16,6 +16,10 @@ urlpatterns = [
          views.edit_questionnaire, name='edit-questionnaires'),
     path('web/manage-data/<int:q_id>/',
          views.manage_data, name='manage-data'),
+    path('web/edit-data/',
+         views.edit_data, name='edit-data'),
+    path('web/delete-data/<int:q_id>/',
+         views.delete_question, name='delete-data'),
     path('web/publish-questionnaire/<int:q_id>/',
          views.publish_questionnaire, name='publish-questionnaires'),
     path('web/add-question/<int:q_id>/',

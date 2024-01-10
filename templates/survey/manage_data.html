@@ -41,7 +41,7 @@
                                     <div class="col-lg-10">
                                         <div class="form-group">
                                             
-                                            <input type="file" name="csv_file" id="csv_file" required class="form-control">
+                                            <input type="file" name="excel_file" id="excel_file" required class="form-control">
                                         </div>
                                     </div>
                                     <div class="col-lg-2">
@@ -52,9 +52,195 @@
                                 </div>
                             </div>
                         </form>
+
+                        <!-- Light table -->
+                        <h6 class="heading-small text-muted">&nbsp;</h6>
+                        <div class="table-responsive">
+                            <table class="table align-items-center table-flush table-dark">
+                                <thead class="thead-dark">
+                                <tr>
+                                    <th scope="col">MFL Code</th>
+                                    <th scope="col">CCC No</th>
+                                    <th scope="col"></th>
+                                </tr>
+                                </thead>
+                                <tbody class="list">
+                                {% for foo in q_data %}
+                                    <tr>
+                                        <td>{{ foo.mfl_code }}</td>
+                                        <td>{{ foo.ccc_number }}</td>
+                                        <td class="text-right">
+                                            <div class="dropdown">
+                                                <a class="btn btn-sm btn-icon-only text-light open-modal" href="#" role="button"
+                                                   data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" data-ccc_no="{{foo.ccc_number}}" data-mfl_code="{{foo.mfl_code}}" data-q_id="{{foo.id}}">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-right dropdown-menu-arrow">
+                                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#edit_data">Edit</a> 
+                                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#delete_data">Delete</a>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+
+                                </tbody>
+                            </table>
+                        </div>
+                        <!-- Card footer -->
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- Edit Data Modal -->
+        <div class="modal fade" id="edit_data" tabindex="-1" role="dialog" aria-labelledby="edit_dataLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title" id="edit_dataLabel">Edit Data</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="edit-data-form">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="title">CCC Number</label>
+                                </div>
+                            </div>
+                            <div class="col-sm-8">
+                                <div class="form-group">
+                                    <input type="text" id="ccc_number" name="ccc_number" class="form-control" placeholder="CCC Number" required>
+                                    <input type="hidden" id="q_id" value=""/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="title">MFL Code</label>
+                                </div>
+                            </div>
+                            <div class="col-sm-8">
+                                <div class="form-group">
+                                    <input type="text" id="mfl_code" name="mfl_code" class="form-control" placeholder="MFL Code" required>
+                                </div>
+                            </div>
+                        </div>
+                </form>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" id="save_data" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- Delete Data Modal -->
+        <div class="modal fade" id="delete_data" tabindex="-1" role="dialog" aria-labelledby="delete_dataLabel" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header border-bottom">
+                    <h5 class="modal-title" id="delete_dataLabel">Delete Data</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="delete-data-form">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="ccc_number_del">CCC Number</label>
+                                </div>
+                            </div>
+                            <div class="col-sm-8">
+                                <div class="form-group">
+                                    <input type="text" id="ccc_number_del" name="ccc_number_del" class="form-control" placeholder="CCC Number" disabled>
+                                    <input type="hidden" id="q_id_del" value=""/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="form-control-label" for="mfl_code_del">MFL Code</label>
+                                </div>
+                            </div>
+                            <div class="col-sm-8">
+                                <div class="form-group">
+                                    <input type="text" id="mfl_code_del" name="mfl_code_del" class="form-control" placeholder="MFL Code" disabled>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" id="del_data" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- Alert -->
+        <div id="alert-success" class="alert alert-success alert-dismissible fade hide" role="alert">
+            <span id="success-message"></span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+
+        <div id="alert-error" class="alert alert-danger alert-dismissible fade hide" role="alert">
+            <span id="error-message"></span>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        
    </div>
+{% endblock %}
+
+{% block scripts %}
+    <script>
+       $(document).on("click", ".open-modal", function () {
+            var ccc_no = $(this).data('ccc_no');
+            var mfl_code = $(this).data('mfl_code');
+            var q_id = $(this).data('q_id');
+
+            $(".modal-body #ccc_number").val(ccc_no);
+            $(".modal-body #mfl_code").val(mfl_code);
+            $(".modal-body #q_id").val(q_id);
+            
+        });
+
+        $(document).on("click", "#save_data", function () {
+            
+            $.ajax({
+                    method:'POST',
+                    url:"{% url 'edit-data' %}",
+                    data:{
+                        q_id:$('.modal-body #q_id').val(),
+                        ccc_number:$('.modal-body #ccc_number').val(),
+                        mfl_code:$('.modal-body #mfl_code').val(),
+                        csrfmiddlewaretoken:$('input[name=csrfmiddlewaretoken]').val()
+                    }, 
+                    success: function(data) {
+                        $('#edit_data').modal('hide')
+                        console.log(data.Message);   
+                        location.reload(true);                 
+                    },
+                    error: function(data){
+                        console.log(data.message);
+                    },  
+            });
+            
+        });
+    </script>
 {% endblock %}

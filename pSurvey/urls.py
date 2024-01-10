@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import re_path
 from django.contrib import admin
 from django.conf.urls.static import serve
 from django.urls import path, include
@@ -7,16 +7,16 @@ from errorPages import views
 from . import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
-    url(r'^', include('authApp.urls')),
-    url(r'^', include('survey.urls')),
-    url(r'^', include('reports.urls')),
-    url(r'^auth/', include('djoser.urls')),
-    url(r'^auth/', include('djoser.urls.authtoken')),
+    re_path(r'^', include('authApp.urls')),
+    re_path(r'^', include('survey.urls')),
+    re_path(r'^', include('reports.urls')),
+    re_path(r'^auth/', include('djoser.urls')),
+    re_path(r'^auth/', include('djoser.urls.authtoken')),
 
 ]
 if settings.DEBUG:
     urlpatterns += [
-        url(r'^static/(?P<path>.*)$', serve, {
+        re_path(r'^static/(?P<path>.*)$', serve, {
             'document_root': settings.STATIC_ROOT
         })
     ] 

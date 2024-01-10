@@ -1,4 +1,4 @@
-from django.conf.urls import url
+from django.urls import re_path
 from django.contrib.auth.decorators import login_required
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from rest_framework import routers
@@ -20,7 +20,7 @@ urlpatterns = [
     path('web/reports/users', views.users_report, name='users_report'),
     path('web/reports/patients', views.patients_report, name='patients_report'),
     path('web/patients/list', views.Patients, name='patients_list'),
-    url('^api/', include(router.urls)),
+    re_path('^api/', include(router.urls)),
 
 ]
 urlpatterns += staticfiles_urlpatterns()
