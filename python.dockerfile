@@ -1,6 +1,6 @@
 
 # base image
-FROM python:3.6
+FROM python:3.10.12
 # setup environment variable
 #ENV DockerHOME=/home/project
 
