@@ -20,7 +20,7 @@ from django.shortcuts import render, redirect
 from docutils.nodes import status
 from rest_framework import status
 from rest_framework import generics
-import pandas as pd
+#import pandas as pd
 from tablib import Dataset
 from rest_framework.response import Response as Res
 from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
@@ -1037,9 +1037,8 @@ def new_questionnaire(request):
     elif user.access_level.id == 4:
         raise PermissionDenied
 
-
 @login_required
-def publish_questionnaire(request, q_id):
+def publish_questionnaire(request, q_id,q_action):
     user = request.user
     u = user
     error_msg = ''
@@ -1054,7 +1053,7 @@ def publish_questionnaire(request, q_id):
             # return error
             return HttpResponse("error")
         else:
-            create_quest.is_published = True
+            create_quest.is_published = True if q_action == 'Publish' else False
             create_quest.save()
 
             # # create the responses flat table
@@ -1084,6 +1083,7 @@ def publish_questionnaire(request, q_id):
             'q': question,
             'fac_sel': s,
             'error_msg': error_msg,
+            'q_action': q_action,
         }
         return render(request, 'survey/publish_questionnaire.html', context)
 

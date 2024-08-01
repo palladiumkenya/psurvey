@@ -10,14 +10,16 @@
 {% endblock %}
 {% block breadcrumb %}
 
-    <h6 class="h4 text-white d-inline-block mb-0">Publish questionnaire</h6>
+    <h6 class="h4 text-white d-inline-block mb-0">{{ q_action }} questionnaire</h6>
+
     <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
         <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
             <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="fas fa-home"></i></a></li>
             <li class="breadcrumb-item"><a href="{% url 'questionnaires' %}"><small>Questionnaires</small></a></li>
-            <li class="breadcrumb-item"><a href="{% url 'new-questionnaires' %}"><small>Publish questionnaire</small></a>
+            <li class="breadcrumb-item">
+                <a href="{% url 'new-questionnaires' %}"><small>{{ q_action }} questionnaire</small></a>
             </li>
-            <li class="breadcrumb-item active" aria-current="page"><small>Publish questionnaire</small></li>
+            <li class="breadcrumb-item active" aria-current="page"><small>{{ q_action }} questionnaire</small></li>
         </ol>
     </nav>
 {% endblock %}
@@ -35,7 +37,7 @@
             <div class="card">
                 <!-- Card header -->
                 <div class="card-header border-0">
-                    <h3 class="mb-0">Publish Questionnaire</h3>
+                    <h3 class="mb-0">{{ q_action }} Questionnaire</h3>
 
                     {% if error_msg  %}
                         <ul class="messages">
@@ -47,7 +49,7 @@
                 </div>
                 <div class="card-body">
                     <form class="form-group" id="questForm" method="post"
-                          action="{% url 'publish-questionnaires' q_id=q.id %}">
+                          action="{% url 'publish-questionnaires' q_id=q.id q_action=q_action %}">
                         {% csrf_token %}
                         <h6 class="heading-small text-muted mb-4">Questionnaire Information</h6>
                         <div class="pl-lg-4">
@@ -120,7 +122,7 @@
                             </div>
                         </div>
                         <hr class="my-4"/>
-                        <button type="submit" class="btn btn-success">Publish</button>
+                        <button type="submit" class="btn btn-success">{{ q_action }}</button>
                         <a href="{% url 'questionnaires' %}" type="menu" class="btn btn-danger">Cancel</a>
 
 
@@ -184,7 +186,7 @@
                                 text: 'Questionnaire Details Saved',
                                 icon: 'success'
                             });
-                            location.reload();
+                            window.location.replace("{% url 'questionnaires' %}");
                         }
                     },
                     error: function (er) {
