@@ -20,7 +20,7 @@ urlpatterns = [
          views.edit_data, name='edit-data'),
     path('web/delete-data/<int:q_id>/',
          views.delete_question, name='delete-data'),
-    path('web/publish-questionnaire/<int:q_id>/',
+    path('web/publish-questionnaire/<int:q_id>/<str:q_action>/',
          views.publish_questionnaire, name='publish-questionnaires'),
     path('web/add-question/<int:q_id>/',
          views.add_question, name='add-question'),

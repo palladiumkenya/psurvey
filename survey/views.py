@@ -1427,8 +1427,7 @@ def questionnaire(request):
         elif user.access_level.id == 2:
             fac = Partner_Facility.objects.filter(
                 partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True))
-            q = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('facility_id', flat=True)
-                                                      ).values_list('questionnaire_id').distinct()
+            q = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('facility_id', flat=True)).values_list('questionnaire_id').distinct()
             quest = Questionnaire.objects.filter(
                 id__in=q).order_by('-created_at')
             count = quest.count()
@@ -1452,8 +1451,7 @@ def questionnaire(request):
         elif user.access_level.id == 5:
             fac = Partner_Facility.objects.filter(
                 partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True))
-            q = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('facility_id', flat=True)
-                                                      ).values_list('questionnaire_id').distinct()
+            q = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('facility_id', flat=True)).values_list('questionnaire_id').distinct()
             quest = Questionnaire.objects.filter(
                 id__in=q).order_by('-created_at')
             count = quest.count()
