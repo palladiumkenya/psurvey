@@ -1,5 +1,6 @@
 {% extends 'survey/base.html' %}
 {% load static %}
+{% load humanize %}
 {% block title %}
     Dashboard
 {% endblock %}
@@ -33,24 +34,17 @@
                 <!-- Card body -->
                 <div class="card-body">
                     <div class="row">
-                        {% if u.access_level.id != 4 %}
-                            <div class="col">
-                                <h5 class="card-title text-uppercase text-muted mb-0">Number of facilities</h5>
-                                <span id="fac" class="h2 font-weight-bold mb-0">{{ fac.count }}</span>
-                            </div>
-                        {% else %}
-                            <div class="col">
-                                <h5 class="card-title text-uppercase text-muted mb-0">Number of patients served</h5>
-                                <span class="h2 font-weight-bold mb-0">{{ fac }}</span>
-                            </div>
-                        {% endif %}
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0">Completed surveys</h5>
+                            <span id="resp" class="h2 font-weight-bold mb-0">{{ resp.count|intcomma }}</span>
+                        </div>
                         <div class="col-auto">
-                            <div class="icon icon-shape bg-gradient-red text-white rounded-circle shadow">
-                                <i class="ni ni-active-40"></i>
+                            <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow">
+                                <i class="ni ni-folder-17"></i>
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>                
             </div>
         </div>
         <div class="col-xl-3 col-md-6">
@@ -60,7 +54,7 @@
                     <div class="row">
                         <div class="col">
                             <h5 class="card-title text-uppercase text-muted mb-0">Total Questionnaires</h5>
-                            <span id="quest" class="h2 font-weight-bold mb-0">{{ quest.count }}</span>
+                            <span id="quest" class="h2 font-weight-bold mb-0">{{ quest.count|intcomma }}</span>
                         </div>
                         <div class="col-auto">
                             <div class="icon icon-shape bg-gradient-orange text-white rounded-circle shadow">
@@ -78,7 +72,7 @@
                     <div class="row">
                         <div class="col">
                             <h5 class="card-title text-uppercase text-muted mb-0">Active Questionnaires</h5>
-                            <span id="aq" class="h2 font-weight-bold mb-0">{{ aq.count }}</span>
+                            <span id="aq" class="h2 font-weight-bold mb-0">{{ aq.count|intcomma }}</span>
                         </div>
                         <div class="col-auto">
                             <div class="icon icon-shape bg-gradient-green text-white rounded-circle shadow">
@@ -94,17 +88,26 @@
                 <!-- Card body -->
                 <div class="card-body">
                     <div class="row">
-                        <div class="col">
-                            <h5 class="card-title text-uppercase text-muted mb-0">Total completed surveys</h5>
-                            <span id="resp" class="h2 font-weight-bold mb-0">{{ resp.count }}</span>
-                        </div>
+                        {% if u.access_level.id != 4 %}
+                            <div class="col">
+                                <h5 class="card-title text-uppercase text-muted mb-0"> Participating Facilities</h5>
+                                <span id="fac" class="h2 font-weight-bold mb-0">{{ fac_quest.count|intcomma }}</span>
+                                <span class="h6 font-weight-bold text-muted mb-0">of {{ fac.count|intcomma }}</span>  
+                            </div>
+                        {% else %}
+                            <div class="col">
+                                <h5 class="card-title text-uppercase text-muted mb-0">Number of patients surveyed</h5>
+                                <span class="h2 font-weight-bold mb-0">{{ fac|intcomma }}</span>
+                            </div>
+                        {% endif %}
                         <div class="col-auto">
-                            <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow">
-                                <i class="ni ni-folder-17"></i>
+                            <div class="icon icon-shape bg-gradient-red text-white rounded-circle shadow">
+                                <i class="ni ni-active-40"></i>
                             </div>
                         </div>
                     </div>
                 </div>
+                
             </div>
         </div>
         <!-- <div class="col-xl-3 col-md-6">
@@ -145,171 +148,54 @@
     </div>
     </div>
     </div>
+
     <!-- Page content -->
     <div class="container-fluid mt--6">
     <div class="row">
         <div class="col-xl-12">
-            <div class="card">
-                <div class="card-header border-0">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <h5 class="mb-0">Filters</h5>
-                        </div>
-                        <div class="col text-right">
-                        </div>
-                    </div>
-                </div>
+            <div class="card">              
                 <div class="card-body">
                     <div class="row">
                         <div class="col-xl-4">
                             <div class="form-group">
-                                <label class="form-control-label" for="questionnaires">Questionnaires</label>
+                                <label class="form-control-label" for="questionnaires">Showing</label>
                                 <div>
-                                    <select multiple="multiple" class="form-control" name="questionnaires" id="questionnaires"
-                                        placeholder="Questionnaires" onchange="facChange()" required>
-                                        {% for f in quest %}
-                                        <option value="{{ f.id }}">{{ f.name }}</option>
-                                        {% endfor %}
+                                    <select class="form-control" name="dash_overview" id="dash_overview"
+                                        placeholder="Overview" onchange="facChange()">
+                                        <option value="all">All</option>
+                                        <option value="active">Active</option>
+                                        <option value="inactive">Inactive</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-xl-4">
 
-                            <label class="form-control-label" for="reportrange">Date Range</label>
-                            <div id="reportrange"
-                                 style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc; width: 100%">
-                                <i class="ni ni-calendar-grid-58"></i>&nbsp;
-                                <span></span> <i class="fa fa-caret-down"></i>
+                    </div>
+                </div>
+            </div> 
+        </div>
+    </div>
+
+    <div  class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card card-stats">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col">
+                            <h5 class="card-title text-uppercase text-muted mb-0">Number of Facilities Not Started Questionnaires</h5>
+                            <span id="notstart" class="h2 font-weight-bold mb-0"></span>
+                        </div>
+                        <div class="col-auto">
+                            <div class="icon icon-shape bg-gradient-info text-white rounded-circle shadow">
+                                <i class="ni ni-button-pause"></i>
                             </div>
                         </div>
-                        {% if u.access_level.id != 4 %}
-                            <div class="col-xl-4">
-                                <div class="form-group">
-                                    <label class="form-control-label" for="facility">Facilities</label>
-                                    <div>
-                                        <select multiple="multiple" class="form-control" name="facility" id="facility"
-                                                placeholder="Facilities" onchange="facChange()" required>
-                                            {% for f in fac %}
-                                                <option value="{{ f.id }}">{{ f.name }} | {{ f.county }}
-                                                    | {{ f.sub_county }}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endif %}
-                        {% if u.access_level.id == 3 %}
-                            <div class="col-xl-4">
-                                <div class="form-group">
-                                    <label class="form-control-label" for="org">Organizations</label>
-                                    <div>
-                                        <select multiple="multiple" class="form-control" name="org" id="org"
-                                                placeholder="Organizations" onchange="facChange()" required>
-                                            {% for f in org %}
-                                                <option value="{{ f.id }}">{{ f.name }} </option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endif %}
-                        <!-- <div class="col-xl-2 col-2">
-                            <label class="form-control-label" for="activedd">Survey Status</label>
-                            <div>
-                                <select class="form-control" name="activedd" id="activedd" onchange="facChange()" required>
-                                    <option value="" selected>Select One</option>
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
-                                </select>
-                            </div>
-                        </div> -->
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-xl-8">
-            <div class="card bg-defaudefault">
-                <div class="card-header bg-transparent">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <h6 class="text-light text-uppercase ls-1 mb-1">Overview</h6>
-                            <h5 class="h3 text-blue mb-0">Responses Trend</h5>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <!-- Chart -->
-                    <div class="chart" id="chart1">
-                        <!-- Chart wrapper -->
-                        <canvas id="population-chart" data-url="{% url 'all-resp-chart' %}"
-                                class="chart-canvas"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-xl-4">
-            <div class="card bg-default">
-                <div class="card-header bg-transparent">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <h6 class="text-uppercase text-muted ls-1 mb-1">Performance</h6>
-                            <h5 class="h3 text-white mb-0">Surveys' Performance</h5>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <!-- Chart -->
-                    <div class="chart" id="chart2">
-                        <canvas id="chart-bar" data-url="{% url 'trend-chart' %}" class="chart-canvas"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {% if u.access_level.id == 2 or u.access_level.id == 3%}
-        <div class="col-xl-12">
-            <div class="card bg-default">
-                <div class="card-header bg-transparent">
-                    <div class="row align-items-center">
-                        <div class="col">
-                            <h5 class="h3 text-white mb-0">Partners' Performance - Proportion of surveys received against unverified numbers</h5>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <!-- Chart -->
-                    <div class="chart" id="chart3">
-                        <canvas id="partner-bar" data-url="{% url 'partner-chart' %}" class="chart-canvas"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="table-responsive">
-            <table class="table align-items-center table-flush table-dark">
-                <thead class="thead-dark">
-                    <tr>
-                        <th scope="col">Partner</th>
-                        <th scope="col">#Unverified</th>
-                        <th scope="col">Surveys received</th>
-                        <th scope="col">% Surveys Proportion</th>
-                    </tr>
-                </thead>
-                <tbody class="list">
-                    {% for foo in data %}
-                    <tr>
-                        <td>{{ foo.name }}</td>
-                        <td>{{ foo.unverified }}</td>
-                        <td>{{ foo.c }}</td>
-                        <td>{{ foo.perc }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        {% endif %}
-    </div>
+   <!-- Response trends-->
 {% endblock %}
 {% block scripts %}
     <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>

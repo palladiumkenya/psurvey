@@ -18,3 +18,7 @@ class LoginForm(forms.Form):
             }
         )
     )
+
+class QuestionnaireDataForm(forms.Form):
+    ccc_number = forms.CharField(label="CCC Number",max_length=15)
+    mfl_code = forms.CharField(label="MFL Code",max_length=15)

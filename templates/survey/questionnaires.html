@@ -113,11 +113,11 @@
                                 <thead class="thead-light">
                                 <tr>
                                     <th>Name</th>
-                                    <th scope="col">Status</th>
-                                    <th scope="col">Active till</th>
-                                    <th scope="col">Number of Questions</th>
                                     <th scope="col">Target App</th>
                                     <th scope="col">Published</th>
+                                    <th scope="col">Number of Questions</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Active till</th>
                                     <th scope="col"></th>
                                 </tr>
                                 </thead>
@@ -126,6 +126,9 @@
                                     {% for foo in quest %}
                                         <tr class="view">
                                             <td>{{ foo.name }}</td>
+                                            <td>{{ foo.target_app }}</td>
+                                            <td>{{ foo.is_published }}</td>
+                                            <td>{{ foo.number_of_questions }}</td>
                                             <td>{% if foo.is_active %}
                                                 <span class="badge badge-dot mr-4">
                                         <i class="bg-success"></i>
@@ -140,9 +143,6 @@
                                             {% endif %}
                                             </td>
                                             <td>{{ foo.active_till }}</td>
-                                            <td>{{ foo.number_of_questions }}</td>
-                                            <td>{{ foo.target_app }}</td>
-                                            <td>{{ foo.is_published }}</td>
                                             {% if u.access_level.id == 5 %}
                                                 {% if perms.survey.change_questionnaire %}
                                                     <td class="text-right">
@@ -282,11 +282,11 @@
                             <tr>
                                 <th scope="col"></th>
                                 <th >Name</th>
-                                <th scope="col">Status</th>
-                                <th scope="col">Active till</th>
-                                <th scope="col">Number of Questions</th>
                                 <th scope="col">Target App</th>
                                 <th scope="col">Published</th>
+                                <th scope="col">Number of Questions</th>
+                                <th scope="col">Status</th>
+                                <th scope="col">Active till</th>
                             </tr>
                             </thead>
                             <tbody class="list">
@@ -310,6 +310,13 @@
                                                             Manage external data</a>
                                                     <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
                                                              Questionnaire Response Summary</a>
+                                                    {% if not foo.is_published %}
+                                                            <a class="dropdown-item" href="{% url 'publish-questionnaires' q_id=foo.id q_action='Publish' %}">
+                                                        Publish Questionnaire</a>
+                                                    {% else %}
+                                                            <a class="dropdown-item" href="{% url 'publish-questionnaires' q_id=foo.id q_action='Unpublish' %}">
+                                                        Unpublish Questionnaire</a>
+                                                    {% endif %}
                                                 {% else %}
                                                     <a class="dropdown-item disabled"
                                                     href="{% url 'edit-questionnaires' q_id=foo.id %}">Edit
@@ -321,34 +328,12 @@
                                                                 Manage external data</a>
                                                     <a class="dropdown-item" href="{% url 'q_response_report' q_id=foo.id %}">
                                                                 Questionnaire Response Summary</a>
-                                                {% endif %}
-
-                                                {% if not foo.is_published %}
-													{% if u.access_level.id == 2 or u.access_level.id == 3 %}
-														<a class="dropdown-item" href="{% url 'publish-questionnaires' q_id=foo.id %}">
-                                                    Publish Questionnaire</a>
-													{% endif %}
-                                                {% endif %}
+                                                {% endif %}                                           
 
                                             </div>
                                         </div>
                                     </td>
                                         <td>{{ foo.name }}</td>
-                                        <td>{% if foo.is_active %}
-                                            <span class="badge badge-dot mr-4">
-                                        <i class="bg-success"></i>
-                                        <span class="status">Active</span>
-                                    </span>
-                                        {% else %}
-                                            <span class="badge badge-dot mr-4">
-                                        <i class="bg-warning"></i>
-                                        <span class="status">Inactive</span>
-                                    </span>
-
-                                        {% endif %}
-                                        </td>
-                                        <td>{{ foo.active_till }}</td>
-                                        <td>{{ foo.number_of_questions }}</td>
                                         <td>{{ foo.target_app }}</td>
                                         <td>
                                             {% if foo.is_published %}
@@ -364,7 +349,21 @@
         
                                             {% endif %}
                                         </td>
-                                        
+                                        <td>{{ foo.number_of_questions }}</td>
+                                        <td>{% if foo.is_active %}
+                                            <span class="badge badge-dot mr-4">
+                                        <i class="bg-success"></i>
+                                        <span class="status">Active</span>
+                                    </span>
+                                        {% else %}
+                                            <span class="badge badge-dot mr-4">
+                                        <i class="bg-warning"></i>
+                                        <span class="status">Inactive</span>
+                                    </span>
+
+                                        {% endif %}
+                                        </td>
+                                        <td>{{ foo.active_till }}</td>                                        
                                     </tr>
                                     <tr class="fold">
                                         <td colspan="7">

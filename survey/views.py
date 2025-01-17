@@ -19,15 +19,21 @@ from django.http import HttpResponse, Http404, JsonResponse
 from django.shortcuts import render, redirect
 from docutils.nodes import status
 from rest_framework import status
+from rest_framework import generics
+#import pandas as pd
+from tablib import Dataset
 from rest_framework.response import Response as Res
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.renderers import JSONRenderer, TemplateHTMLRenderer
+from rest_framework.decorators import api_view, permission_classes, renderer_classes
 from rest_framework.permissions import IsAuthenticated
+from import_export import resources
 
 from survey.bulk_manager import BulkCreateManager
 
 
 from .models import *
 from .serializer import *
+from .forms import QuestionnaireDataForm
 from authApp.serializer import *
 from string import digits
 
@@ -319,7 +325,10 @@ def index(request):
     user = request.user
     is_active = request.POST.get('active')
 
-    if user.access_level.id == 2 or user.access_level.id == 3:
+    if user.access_level.id == 3:
+        fac_quest = Facility.objects.filter(id__in=Users.objects.filter(
+            id__in=Started_Questionnaire.objects.filter(id__in=End_Questionnaire.objects.all().values_list('session_id', flat=True)).values_list('started_by_id', flat=True)).values_list('facility_id', flat=True).distinct()).order_by('county', 'sub_county', 'name')
+
         fac = Facility.objects.all().order_by('county', 'sub_county', 'name')
         quest = Questionnaire.objects.filter(is_active=True).order_by('name')
         if is_active == 'active':
@@ -330,38 +339,39 @@ def index(request):
                 is_active=False).values_list('id', flat=True)
         aq = Questionnaire.objects.filter(
             is_active=True, active_till__gte=date.today())
-        # resp = End_Questionnaire.objects.filter()
-        resp = ResponsesFlat.objects.filter()
+        resp = End_Questionnaire.objects.filter()
+        # resp = ResponsesFlat.objects.filter()
         queryset = Facility.objects.all().distinct('county')
         org = Partner.objects.all().order_by('name')
 
         data1 = []
-        unverified = Partner.objects.filter().values('name', 'unverified')
-        submitted = ResponsesFlat.objects.filter().annotate(name=F('partner_name')
-                                                            ).values('name').annotate(c=Count('survey_id')).values('name', 'c').order_by('c')
+        # resp = []
+        # unverified = Partner.objects.filter().values('name', 'unverified')
+        # submitted = ResponsesFlat.objects.filter().annotate(name=F('partner_name')                                                            ).values('name').annotate(c=Count('survey_id')).values('name', 'c').order_by('c')
 
         # print(submitted)
-        model_combination = list(chain(unverified, submitted))
-        out = {}
-        for d in model_combination:
-            out[d["name"]] = {**out.get(d["name"], {}), **d}
+        # model_combination = list(chain(unverified, submitted))
+        # out = {}
+        # for d in model_combination:
+        #     out[d["name"]] = {**out.get(d["name"], {}), **d}
 
-        out = list(out.values())
-        # get percentages
-        for o in out:
-            try:
-                o['perc'] = float("{0:.2f}".format(
-                    (o['c']) * 100/o['unverified']))
-                o['pending'] = o['unverified'] - o['c']
-                data1.append(o)
-            except:
-                pass
-        # sort
-        data1 = sorted(data1, key=lambda d: d['perc'], reverse=True)
+        # out = list(out.values())
+        # # get percentages
+        # for o in out:
+        #     try:
+        #         o['perc'] = float("{0:.2f}".format(
+        #             (o['c']) * 100/o['unverified']))
+        #         o['pending'] = o['unverified'] - o['c']
+        #         data1.append(o)
+        #     except:
+        #         pass
+        # # sort
+        # data1 = sorted(data1, key=lambda d: d['perc'], reverse=True)
 
         context = {
             'u': user,
             'fac': fac,
+            'fac_quest': fac_quest,
             'quest': quest,
             'aq': aq,
             'resp': resp,
@@ -1027,9 +1037,8 @@ def new_questionnaire(request):
     elif user.access_level.id == 4:
         raise PermissionDenied
 
-
 @login_required
-def publish_questionnaire(request, q_id):
+def publish_questionnaire(request, q_id,q_action):
     user = request.user
     u = user
     error_msg = ''
@@ -1044,7 +1053,7 @@ def publish_questionnaire(request, q_id):
             # return error
             return HttpResponse("error")
         else:
-            create_quest.is_published = True
+            create_quest.is_published = True if q_action == 'Publish' else False
             create_quest.save()
 
             # # create the responses flat table
@@ -1074,12 +1083,16 @@ def publish_questionnaire(request, q_id):
             'q': question,
             'fac_sel': s,
             'error_msg': error_msg,
+            'q_action': q_action,
         }
         return render(request, 'survey/publish_questionnaire.html', context)
 
 
 @login_required
 def manage_data(request, q_id):
+
+    data = []
+    context = {}
     user = request.user
     u = user
     question = Questionnaire.objects.get(id=q_id)
@@ -1087,11 +1100,63 @@ def manage_data(request, q_id):
     context = {
         'u': u,
         'q': question,
+        'q_data': [],
     }
 
+    if request.method == "POST":
+        try:
+            file = request.FILES['excel_file']
+            df = pd.read_excel(file)
+
+            #Rename the headers in the excel file to match Django models fields
+            rename_columns = {"MFL Code": "mfl_code", "CCC No": "ccc_number"}
+            df.rename(columns = rename_columns, inplace=True)
+
+            # add the questionnaire id
+            # return HttpResponse(json.dumps(len(df)))
+            row_count = len(df) if len(df) > 0 else 0
+            # df["id"] = [8] * row_count
+            df["questionnaire"] = [q_id] * row_count
+
+            # add key field if any
+            id_values = []
+            for row in df.itertuples():
+                if Questionnaire_Data.objects.filter(questionnaire=row.questionnaire,mfl_code = row.mfl_code, ccc_number =row.ccc_number).exists():
+                    id_val = Questionnaire_Data.objects.get(questionnaire=row.questionnaire,mfl_code = row.mfl_code, ccc_number =row.ccc_number).id
+                    id_values.append(str(id_val))
+                else:
+                    id_values.append(None)
+                    
+            df["id"] = id_values
+
+            #Call the questionnaire data Resource Model and make its instance
+            questionnaire_data_resource = resources.modelresource_factory(model=Questionnaire_Data)()
+
+            # Load the pandas dataframe into a tablib dataset
+            dataset = Dataset().load(df)
+
+            # Call the import_data hook and pass the tablib dataset
+            result = questionnaire_data_resource.import_data(dataset, dry_run=True, raise_errors = True)
+
+            if not result.has_errors():
+                result = questionnaire_data_resource.import_data(dataset, dry_run=False)
+                context['status'] = "Questionnaire Data Imported Successfully"
+            else:
+                context['status'] = "Questionnaire Data Not Imported "
+
+        except Exception as e:
+            raise Http404("Unable To Upload File. "+repr(e))
+        
+    
+        
+    # get the questionnaire data
+    q_data = Questionnaire_Data.objects.filter(questionnaire=q_id).order_by('mfl_code','ccc_number')
+    serializer = QuestionnaireDataSerializer(q_data, many=True)
+    context['q_data'] = serializer.data
+        
     return render(request, 'survey/manage_data.html', context)
 
-
+    
 @login_required
 def edit_questionnaire(request, q_id):
     user = request.user
@@ -1362,8 +1427,7 @@ def questionnaire(request):
         elif user.access_level.id == 2:
             fac = Partner_Facility.objects.filter(
                 partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True))
-            q = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('facility_id', flat=True)
-                                                      ).values_list('questionnaire_id').distinct()
+            q = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('facility_id', flat=True)).values_list('questionnaire_id').distinct()
             quest = Questionnaire.objects.filter(
                 id__in=q).order_by('-created_at')
             count = quest.count()
@@ -1387,8 +1451,7 @@ def questionnaire(request):
         elif user.access_level.id == 5:
             fac = Partner_Facility.objects.filter(
                 partner__in=Partner_User.objects.filter(user=user).values_list('name', flat=True))
-            q = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('facility_id', flat=True)
-                                                      ).values_list('questionnaire_id').distinct()
+            q = Facility_Questionnaire.objects.filter(facility_id__in=fac.values_list('facility_id', flat=True)).values_list('questionnaire_id').distinct()
             quest = Questionnaire.objects.filter(
                 id__in=q).order_by('-created_at')
             count = quest.count()
@@ -1494,6 +1557,34 @@ def add_question(request, q_id):
 
     }
     return render(request, 'survey/new_questions.html', context)
+
+@login_required
+@api_view(('POST',))
+def edit_data(request):
+    user = request.user
+
+    if request.method == 'POST':
+        try:
+            q = Questionnaire_Data.objects.get(id=request.POST.get('q_id'))
+            ccc_number = request.POST.get('ccc_number')
+            mfl_code = request.POST.get('mfl_code')
+
+            q.ccc_number = ccc_number
+            q.mfl_code = mfl_code
+            q.save()
+
+            return Res({
+                        "success": True,
+                        "Message": "Questionnaire data saved successfully👌!"
+                    }, status.HTTP_200_OK)
+        except Exception as e:
+            return Res({
+                        "success": False,
+                        "Message": repr(e)
+                    }, status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+   
+
 
 
 @login_required

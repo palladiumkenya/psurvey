@@ -34,6 +34,7 @@ def get_secret(setting, secrets=secrets):
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
+
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = get_secret('SECRET_KEY')
 
@@ -56,6 +57,8 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'django.contrib.humanize',
+    'import_export',
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
@@ -84,8 +87,7 @@ ROOT_URLCONF = 'pSurvey.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')]
-        ,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -101,7 +103,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'pSurvey.wsgi.application'
 
 
-
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
@@ -111,7 +112,8 @@ DATABASES = {
         'NAME': get_secret('DB_NAME'),
         'USER': get_secret('USER'),
         'PASSWORD':  get_secret('PWD'),
-        'HOST': get_secret('HOST'),  # Or an IP Address that your DB is hosted on
+        # Or an IP Address that your DB is hosted on
+        'HOST': get_secret('HOST'),
         'PORT': get_secret('DB_PORT'),
     }
 }

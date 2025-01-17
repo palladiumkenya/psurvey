@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.db import models
+from django.forms import ModelForm
 from authApp.models import Facility, Users
 
 
@@ -77,6 +78,15 @@ class Started_Questionnaire (models.Model):
     class Meta:
         db_table = "Started_Questionnaire"
 
+
+class Questionnaire_Data (models.Model):
+    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
+    ccc_number = models.CharField(max_length=15, null=True)
+    mfl_code = models.PositiveIntegerField()
+    has_completed_survey = models.BooleanField(default=False)
+
+    class Meta:
+        db_table = "Questionnaire_data"
 
 class Response (models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
@@ -170,3 +180,9 @@ class ResponsesFlat(models.Model):
         db_table = "vw_questionnaire_responses_flat_table"
         unique_together = ('survey_id', 'ccc_no', 'other_non_verification_reason',
                            'date_of_last_vl', 'art_start_date', 'gender')
+
+
+class QuestionnaireDataForm(ModelForm):
+    class Meta:
+        model = Questionnaire_Data
+        fields = ["ccc_number", "mfl_code"]
