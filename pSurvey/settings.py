@@ -108,7 +108,7 @@ WSGI_APPLICATION = 'pSurvey.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'psurveyapi',
+        'NAME': get_secret('DB_NAME'),
         'USER': get_secret('USER'),
         'PASSWORD':  get_secret('PWD'),
         'HOST': get_secret('HOST'),  # Or an IP Address that your DB is hosted on
