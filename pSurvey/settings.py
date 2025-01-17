@@ -35,10 +35,10 @@ def get_secret(setting, secrets=secrets):
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'b6&xe78vjs@fr3hjek^36e#01nrq*tgipu5q49s9p0n2-f0q5)'
+SECRET_KEY = get_secret('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = get_secret('DEBUG')
 
 ALLOWED_HOSTS = ['*']
 
@@ -116,7 +116,7 @@ DATABASES = {
     }
 }
 
-LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/web/questionnaires'
 LOGIN_URL = '/'
 
 AUTH_USER_MODEL = 'authApp.Users'
@@ -192,4 +192,4 @@ PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_ROOT = os.path.join(PROJECT_DIR, 'static')
 
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10240
-CSRF_TRUSTED_ORIGINS = ['https://psurveytest.kenyahmis.org']
+CSRF_TRUSTED_ORIGINS = ['https://*.kenyahmis.org']
